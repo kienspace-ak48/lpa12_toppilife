@@ -1,0 +1,96 @@
+<style>
+    
+.animated-gradient {
+  font-size: 32px;
+  font-weight: 800;
+  background: linear-gradient(270deg, #6ee7b7, #60a5fa, #f472b6, #fbbf24);
+  background-size: 200% 200%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+  animation: gradientMove 6s ease infinite;
+}
+
+@keyframes gradientMove {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+</style>
+
+<div class="my-card" style="height: 70vh">
+    <!-- <h1>Homepage</h1> -->
+    <h1 style="margin-top: 30px;">
+    Wellcome back: <span id="greeting" class="animated-gradient" style=" font-weight: 700;"></span>
+    </h1>
+    <div id="quote" style="opacity: 0.7; margin-top: 8px "></div>
+
+<hr class="py-4 mt-5  border-gray-300">
+
+  <div class="max-w-5xl mx-auto">
+
+    <h1 class="text-3xl font-bold mb-8">Website Analytics</h1>
+
+    <!-- cards -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
+
+      <div class="bg-white shadow-lg rounded-xl p-6">
+        <p class="text-gray-500">Total Visits</p>
+        <h2 class="text-4xl font-bold text-blue-600">
+          <%= stats.total %>
+        </h2>
+      </div>
+
+      <div class="bg-white shadow-lg rounded-xl p-6">
+        <p class="text-gray-500">Today Visits</p>
+        <h2 class="text-4xl font-bold text-green-600">
+          <%= stats.today %>
+        </h2>
+      </div>
+
+    </div>
+
+    <!-- table -->
+    <div class="bg-white shadow-lg rounded-xl p-6">
+      <h2 class="text-xl font-semibold mb-4">Top Pages</h2>
+
+      <table class="w-full text-left">
+        <thead>
+          <tr class="border-b">
+            <th class="py-2">Page</th>
+            <th class="py-2">Visits</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          <% stats.topPages.forEach(p => { %>
+            <tr class="border-b hover:bg-gray-50">
+              <td class="py-2"><%= p.path %></td>
+              <td class="py-2 font-semibold"><%= p.count %></td>
+            </tr>
+          <% }) %>
+        </tbody>
+
+      </table>
+    </div>
+
+  </div>
+  <!--  -->
+</div>
+<script>
+   
+    const userName = '<%if(typeof user !== "undefined"){%> <%= user.name%> <%}%> %>'; 
+
+    const quotes = [
+        'Hôm nay là một cơ hội mới để bạn tỏa sáng!',
+        'Làm điều bạn có thể, với những gì bạn có.',
+        'Thành công bắt đầu từ một bước đi nhỏ.',
+        'Đừng ngừng cố gắng — những điều tốt đẹp đang đến!',
+        'Trên hành trình của bạn, luôn có ánh sáng phía trước.',
+    ];
+
+    const randomQuote = quotes[Math.floor(Math.random() * quotes.length)];
+
+    document.getElementById('greeting').innerText =`${userName} 👋 ` ;
+    document.getElementById('quote').innerText = randomQuote;
+</script>

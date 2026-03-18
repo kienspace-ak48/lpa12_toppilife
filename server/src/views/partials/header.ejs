@@ -1,0 +1,51 @@
+<header
+  class="h-16 flex justify-between items-center bg-gray-100 border-b border-gray-300 shadow-sm px-6 sticky top-0 z-40"
+>
+  <!-- LEFT -->
+  <div class="flex items-center gap-4">
+    <!-- sidebar -->
+    <button  class="p-2 rounded-lg hover:bg-gray-200 transition" onclick="toggleSidebar()">
+      <i class="fa-solid fa-bars"></i>
+    </button>
+    <!-- Logo -->
+    <div class="text-xl font-bold text-blue-600 tracking-wide">AdminPanel</div>
+  </div>
+
+  <!-- Center (search) -->
+  <div class="hidden md:flex items-center">
+    <div class="relative">
+      <input
+        type="text"
+        placeholder="Search..."
+        class="w-72 pl-10 pr-4 py-2 border border-gray-300 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+      />
+      <i
+        class="fa-solid fa-magnifying-glass w-4 h-4 absolute left-3 top-2.5 text-gray-400"
+      ></i>
+    </div>
+  </div>
+
+  <!-- RIGHT -->
+  <div class="flex items-center gap-5">
+    <!-- Notification -->
+    <button class="relative p-2 hover:bg-gray-200 rounded-lg">
+      <i class="fa-solid fa-bell"></i>
+      <!-- badge -->
+      <span
+        class="absolute -top-1 -right-1 bg-red-500 text-white text-xs px-1.5 rounded-full"
+        >3</span
+      >
+    </button>
+    <!-- user profile -->
+    <div
+      class="flex items-center gap-3 cursor-pointer hover:bg-gray-200 px-2 py-1 rounded-lg transition"
+    >
+      <!-- <img src="" alt="" /> -->
+       <i class="fa-solid fa-user-shield"></i>
+      <div class="hidden md:block leading-light">
+        <p class="text-sm font-medium">Admin</p>
+        <p class="text-xs text-gray-500">Supper Admin</p>
+      </div>
+    </div>
+  </div>
+</header>

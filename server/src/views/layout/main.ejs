@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <script src="/libs/js/jquery-3.7.1.js"></script>
+    <link rel="stylesheet" href="/css/index.css" />
+    <!-- fontawesome icon -->
+    <link rel="stylesheet" href="/libs/css/all.min.css" />
+    <title>Layout</title>
+    <style>
+      /* hide scrollbar */
+      .hide-scrollbar::-webkit-scrollbar {
+        display: none;
+      }
+
+      .hide-scrollbar {
+        -ms-overflow-style: none; /* IE + Edge */
+        scrollbar-width: none; /* Firefox */
+      }
+      /* IE */
+      .hide-scrollbar {
+        -ms-overflow-style: none;
+      }
+      /*  */
+      #sidebar {
+        width: 16rem;
+        transition: all 0.25s ease;
+      }
+
+      #sidebar.collapsed {
+        width: 4rem;
+      }
+
+      /* ẩn text */
+      #sidebar.collapsed .menu-text {
+        display: none;
+      }
+
+      /* icon nằm giữa */
+      #sidebar.collapsed a,
+      #sidebar.collapsed button {
+        justify-content: center;
+      }
+
+      /* bỏ gap khi collapse */
+      #sidebar.collapsed .flex {
+        gap: 0;
+      }
+
+      /* ẩn dropdown icon */
+      #sidebar.collapsed .fa-chevron-down {
+        display: none;
+      }
+
+      /* submenu khi collapse */
+      #sidebar.collapsed .submenu {
+        margin-left: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <%- include('../partials/header.ejs') %>
+
+    <div class="flex h-[calc(100vh-64px)] bg-slate-100">
+      <!-- sidebar -->
+      <div class="w-64 bg-white border-r border-gray-300" id="sidebar">
+        <%- include('../partials/sidebar.ejs') %>
+      </div>
+      <main class="flex-1  p-6 overflow-y-auto ">
+        <div class="my_wrapper bg-white md:p-8 border border-gray-200 shadow-sm rounded-lg">
+          <%- body %>
+        </div>
+        <!-- express-ejs-layouts sẽ render nội dung ở đây -->
+      </main>
+    </div>
+
+    <%# include('../partials/footer.ejs') %>
+  </body>
+  <!-- //=============== SCRIPT ============// -->
+  <script>
+    function toggleMenu(btn, id) {
+      const menu = document.querySelector("#" + id);
+      menu.classList.toggle("hidden");
+
+      const icon = btn.querySelector(".fa-chevron-down");
+      icon.classList.toggle("rotate-180");
+    }
+
+    function toggleSidebar() {
+      const sidebar = document.querySelector("#sidebar");
+      sidebar.classList.toggle("collapsed");
+      sidebar.classList.toggle("w-64");
+      sidebar.classList.toggle("w-16");
+      document.querySelectorAll('.submenu').forEach(el=>{
+        if(!el){ return}
+        el.classList.add('hidden')
+
+      })
+      document.querySelectorAll(".menu-text").forEach((el) => {
+        if(!el) return
+        el.classList.toggle("hidden");
+      });
+    }
+    const currentPath = window.location.pathname;
+    document.querySelectorAll("nav a").forEach((link) => {
+      const href = link.getAttribute("href");
+
+      if (href === currentPath) {
+        link.classList.remove("bg-blue-50", "text-blue-600", "font-semibold");
+        link.classList.add(
+          "bg-blue-50",
+          "text-blue-600",
+          "font-bold",
+          "scale-105",
+        );
+
+        const submenu = link.closest(".submenu");
+        if (submenu) submenu.classList.remove("hidden");
+      }
+    });
+  </script>
+</html>

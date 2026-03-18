@@ -1,0 +1,37 @@
+<nav  class="p-4 space-y-2 ">
+    <a href="/admin" class="flex items-center gap-3 px-3 py-2 rounded-lg  font-bold">
+        <i class="fa-solid fa-chart-line text-blue-600"></i>
+        <span class="menu-text">Dashboard</span>
+    </a>
+
+    <!-- Products parrent -->
+     <button onclick="toggleMenu(this, 'productMenu')"
+     class="w-full flex items-center justify-between px-3 py-2 rounded-lg hover:bg-gray-100 transition"
+     >
+     <span class="flex items-center gap-3 font-bold">
+        <i class="fa-solid fa-pager text-blue-600"></i>
+        <span class="menu-text">Page config</span>
+     </span>
+     <i class="fa-solid fa-chevron-down text-xs"></i>
+     </button>
+     <!-- submenu -->
+    <div id="productMenu" class="submenu ml-8 mt-1 space-y-1 hidden">
+        <a href="/admin/page-config" class="block px-3 py-2 text-sm rounded-lg hover:bg-gray-100 transition ">
+            <span class="menu-text">Partial page</span>
+        </a>
+            <a href="/admin/page-config/customize-section" class="block px-3 py-2 text-sm rounded-lg hover:bg-gray-100 transition">
+                <span class="menu-text">Advantage</span>
+        </a>
+
+    </div>
+    <!--  -->
+    <!-- <a href="/admin/page-config" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-100 transition">
+        <i class="fa-solid fa-users"></i>
+        Page Configs
+    </a> -->
+    <a href="/admin/gallery" class="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-gray-100 transition font-bold">
+      <i class="fa-solid fa-box text-blue-600"></i>
+        <span class="menu-text">Gallery</span>
+    </a>
+    
+</nav>

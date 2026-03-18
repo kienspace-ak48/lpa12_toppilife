@@ -1,0 +1,967 @@
+<script defer src="/js/pageconfig.js"></script>
+<form id="configForm">
+  <div class="space-y-4">
+<!-- =========== action =========== -->
+<div class="flex justify-between items-center">
+  <h2 class="text-lg font-bold">Pageconfig/ Cấu hình page</h2>
+  <button
+    type="submit"
+    class="px-3 py-2 border border-gray-300 rounded-lg bg-blue-500 font-bold text-white"
+  >
+    Save Config
+  </button>
+</div>
+<!-- ============ Hero ============= -->
+<section class="border border-gray-300 rounded-lg">
+  <button
+    type="button"
+    onclick="toggleSection('hero')"
+    class="w-full flex justify-between p-3 font-medium"
+  >
+    Hero Section
+    <span>+</span>
+  </button>
+  <!-- content -->
+  <div class="p-4" id="hero">
+    <input
+      name="hero_badge"
+      value="<%= pc?.hero?.badge || '' %>"
+      placeholder="Badge"
+      class="border w-full px-3 py-2 rounded"
+    />
+
+    <input
+      name="hero_title"
+      value="<%=pc?.hero?.title||''%>"
+      placeholder="Title"
+      class="border w-full px-3 py-2 rounded"
+    />
+
+    <textarea
+      name="hero_desc"
+      placeholder="Description"
+      class="border w-full px-3 py-2 rounded"
+    ><%=pc?.hero?.desc ||''%></textarea>
+
+    <!-- <input
+      name="hero_img_url"
+      value="<%#=pc?.hero?.img_url||''%>"
+      placeholder="Image URL"
+      class="border w-full px-3 py-2 rounded"
+    /> -->
+    <!--  -->
+    <!-- image handle action -->
+<div class="image_action">
+  <!-- <label for="">Image banner</label> -->
+  <div class="flex justify-between items-center mt-3">
+    <button
+      type="button"
+      class="flex-1 px-4 py-3 chooseImg rounded-lg border border-green-500"
+    >
+      Chọn ảnh
+    </button>
+    <input
+      type="text"
+      name="hero_img_url"
+      value="<%=pc?.hero?.img_url||''%>"
+      class="flex-3 img_input w-full px-4 py-3 border border-gray-300 rounded-lg hidden"
+      placeholder="img"
+    />
+  </div>
+  <div class="img_preview border border-gray-300 w-full h-[200px]">
+    <img
+      src="/<%=pc?.hero?.img_url||''%>"
+      alt=""
+      class="w-full object-cover max-h-[200px]"
+    />
+  </div>
+</div>
+    <!--  -->
+    <textarea name="hero_benefits" id="hero_benefits"  class=" w-full px-3 py-2 border border-gray-300 rounded-lg" placeholder="Enter = 1 sentence"><%=pc?.hero?.benefits.join("\n")%></textarea>
+
+  </div>
+</section>
+<!-- PurchaseFrame -->
+<section class="border border-gray-300 rounded-lg">
+  <button
+    type="button"
+    onclick="toggleSection('purchase')"
+    class="w-full flex justify-between p-3 font-medium"
+  >
+    Purchase Section
+    <span>+</span>
+  </button>
+  <!-- purchase -->
+  <div class="p-4" id="purchase">
+    <input
+      name="purchase_title"
+      value="<%=pc?.purchase_frame?.title||''%>"
+      placeholder="Title"
+      class="border w-full px-3 py-2 rounded"
+    />
+    <input
+      name="purchase_countdown"
+      type="datetime-local"
+      value="<%=pc?.purchase_frame?.countdown ?  new Date(pc.purchase_frame.countdown).toISOString().slice(0,16) 
+: ''%>"
+      placeholder="Countdown"
+      class="border w-full px-3 py-2 rounded"
+    />
+    <!-- issues list -->
+    <!-- <textarea name="purchase_issues" id="" class="border w-full px-3 py-2 rounded" placeholder="Xuong dong = 1 record"><%= pc?.issue?.issues?.join('\n') || '' %></textarea> -->
+
+    <h4 class="font-semibold pt-3">Purchase Card</h4>
+
+    <input
+      name="purchase_sale_presale"
+      value="<%=pc?.purchase_frame?.sale?.presale||''%>"
+      placeholder="pre sale"
+      class="border w-full px-3 py-2 rounded"
+    />
+    <input
+      name="purchase_sale_save_money"
+      value="<%=pc?.purchase_frame?.sale?.save_money||''%>"
+      placeholder="save money"
+      class="border w-full px-3 py-2 rounded"
+    /><input
+      name="purchase_sale_price"
+      value="<%=pc?.purchase_frame?.sale?.price||''%>"
+      placeholder="Price"
+      class="border w-full px-3 py-2 rounded"
+    />
+    <input
+      name="purchase_sale_note"
+      value="<%=pc?.purchase_frame?.sale?.note||''%>"
+      placeholder="Card Title"
+      class="border w-full px-3 py-2 rounded"
+    />
+
+    <!--  -->
+      <h5 class="font-bold">Image <small>(1000x400)</small></h5>
+    <!-- image handle action -->
+<div class="image_action">
+  <!-- <label for="">Image banner</label> -->
+  <div class="flex justify-between items-center mt-3">
+    <button
+    type="button"
+      class="flex-1 px-4 py-3 chooseImg rounded-lg border border-green-500"
+    >
+      Chọn ảnh
+    </button>
+    <input
+      type="text"
+      name="purchase_img_url"
+      value="<%=pc?.purchase_frame?.img_url||''%>"
+      class="flex-3 img_input w-full px-4 py-3 border border-gray-300 rounded-lg hidden"
+      placeholder="img"
+    />
+  </div>
+  <div class="img_preview border border-gray-300 w-full h-[200px]">
+    <img
+      src="/<%=pc?.purchase_frame?.img_url||''%>"
+      alt=""
+      class="w-full object-cover max-h-[200px]"
+    />
+  </div>
+</div>
+    <!--  -->
+    <textarea id="purchase_policy" class="border w-full px-3 py-2 rounded" ><%=pc?.purchase_frame?.policy?.join('\n')%></textarea>
+  </div>
+</section>
+<!-- =============== Warranty ============== -->   
+<section class="border border-gray-300 rounded-lg">
+    <button
+      type="button"
+      onclick="toggleSection('warranty')"
+      class="w-full flex justify-between p-3 font-medium"
+    >
+      Warranty Section
+      <span>+</span>
+    </button>
+    <!-- Content -->
+    <div class="p-4" id="warranty">
+      <textarea
+        id="warrantys"
+        placeholder="enter = 1 sentence"
+        class="border w-full px-3 py-2 rounded"
+      ><%=pc?.warrantys?.join("\n")%></textarea>
+    </div>
+</section>
+<!-- Target Audience -->
+<section class="border border-gray-300 rounded-lg">
+<button
+  type="button"
+  onclick="toggleSection('target_audience')"
+  class="w-full flex justify-between p-3 font-medium"
+>
+  Target Audience
+  <span>+</span>
+</button>
+
+<div class="p-4" id="target_audience">
+
+  <input
+    name="target_audience_title"
+    value="<%= pc?.target_audience?.title || '' %>"
+    placeholder="Section title"
+    class="border w-full px-3 py-2 rounded"
+  />
+
+  <div class="flex justify-between items-center">
+
+    <h4 class="font-semibold mt-4">Cards</h4>
+    <button
+    type="button"
+    id="cta_add_target_card"
+    class="mt-4 px-4 py-2 bg-blue-500 text-white rounded"
+    >
+    + Add Card
+  </button>
+</div>
+
+  <div id="target_audience_wrapper" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+    <% pc?.target_audience?.cards?.forEach(function(card){ %>
+
+    <div class="instance border p-4 rounded mt-3">
+
+      <button
+        type="button"
+        class="remove-instance text-red-500 mb-2"
+      >
+        Remove
+      </button>
+
+      <!-- image -->
+      <div class="image_action">
+
+        <button
+          type="button"
+          class="chooseImg border px-4 py-2 rounded"
+        >
+          Chọn ảnh
+        </button>
+        <input
+        name="img_url"
+        value="<%= card?.img_url || '' %>"
+        class="img_input hidden"
+      />
+
+        <div class="img_preview border mt-2 h-[150px]">
+          <img
+            src="/<%= card?.img_url || '' %>"
+            class="w-full h-full object-cover"
+          />
+        </div>
+
+      </div>
+
+      <input
+        name="title"
+        value="<%= card?.title || '' %>"
+        placeholder="Card title"
+        class="border w-full px-3 py-2 rounded mt-2"
+      />
+
+      <textarea
+        name="desc"
+        placeholder="Description"
+        class="border w-full px-3 py-2 rounded mt-2"
+      ><%= card?.desc || '' %></textarea>
+
+    </div>
+
+    <% }) %>
+
+  </div>
+
+  
+
+</div>
+</section>
+<!-- END -->
+<!-- =============== Review ============== --> 
+<section class="border border-gray-300 rounded-lg">
+  <button
+    type="button"
+    onclick="toggleSection('review')"
+    class="w-full flex justify-between p-3 font-medium"
+  >
+    Review Section
+    <span>+</span>
+  </button>
+  <!-- Content -->
+  <div class="p-4" id="review">
+    <input type="text" value="<%=pc?.review?.title%>" name="review_title" class="px-3 py-2 w-full border border-gray-300 rounded-lg" placeholder="video title">
+    <div class="flex justify-between items-center py-2" >
+      <h4 class="font-bold">video</h4>
+      <button type="button" id="cta_add_review_card" class="px-3 py-2 border border-gray-300 rounded-lg bg-green-500 text-white font-bold">Add video component</button>
+    </div>
+    <div id="review_wapper" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <%if(pc?.review?.videos && pc?.review?.videos.length>0){%>
+        <%pc.review.videos.forEach(v=>{%>
+          <div class="instance relative">
+            <span class="remove-instance w-5 h-5 rounded-lg bg-red-500 text-white font-bold hover:cursor-pointer hover:scale-120 flex items-center justify-center absolute -top-2 right-1">X</span>
+            <div class="p-3 border border-gray-300">
+              <input badge="" value="<%=v.badge%>" type="text" class="px-3 py-2 rounded-lg border border-gray-300 w-full" placeholder="lable">
+              <input lable="" value="<%=v.lable%>" type="text" class="px-3 py-3 rounded-lg border border-gray-300 w-full" placeholder="lable">
+              <textarea video="" name="" id="" class="px-3 py-2 border border-gray-300 w-full" placeholder="video_url"><%=v.video_url%></textarea>
+            </div>
+          </div>
+        <%})%>
+      <%}%>
+    </div>
+</section>
+<!-- END -->
+<!-- =============== Feedback ============== --> 
+<section class="border border-gray-300 rounded-lg">
+  <button
+    type="button"
+    onclick="toggleSection('feedback')"
+    class="w-full flex justify-between p-3 font-medium"
+  >
+    Feedback Section
+    <span>+</span>
+  </button>
+  <!-- Content -->
+  <div class="p-4" id="feedback">
+    <input type="text" value="<%=pc?.feedback?.title%>" name="feedback_title" class="px-3 py-2 w-full border border-gray-300 rounded-lg" placeholder="video title">
+    <div class="flex justify-between items-center py-2" >
+      <h4 class="font-bold">feedback</h4>
+      <button type="button" id="cta_add_feedback_card" class="px-3 py-2 border border-gray-300 rounded-lg bg-green-500 text-white font-bold">Add video component</button>
+    </div>
+    <div id="feedback_wapper" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <%if(pc?.feedback?.list && pc?.feedback?.list.length>0){%>
+        <%pc.feedback.list.forEach(f=>{%>
+          <div class="instance relative border border-gray-300 p-2">
+            <span class="remove-instance w-5 h-5 rounded-lg bg-red-500 text-white font-bold hover:cursor-pointer hover:scale-120 flex items-center justify-center absolute -top-2 right-1">X</span>
+            <div>
+              <div class="flex">
+                <input lable="" value="<%=f.title%>" type="text" class="px-3 py-2 rounded-lg border border-gray-300  w-full" placeholder="title">
+                <input star="" value="<%=f.star%>" type="number" class="px-3 py-2 rounded-lg border border-gray-300  w-full" placeholder="star">
+              </div>
+              <textarea desc="" name="" id="" class="px-3 py-2 rounded-lg border border-gray-300 w-full" placeholder="comment"><%=f.desc%></textarea>
+              <!-- <input type="text" class="px-3 py-2 rounded-lg border border-gray-300  w-full" placeholder="title"> -->
+            </div>
+          </div>
+        <%})%>
+      <%}%>
+    </div>
+</section>
+<!-- =============== Teachnology ============ -->
+ <section class="border border-gray-300 rounded-lg">
+  <button
+    type="button"
+    onclick="toggleSection('teachnology')"
+    class="w-full flex justify-between p-3 font-medium"
+  >
+    Teachnology Section
+    <span>+</span>
+  </button>
+  <!-- Content -->
+  <div class="p-4" id="teachnology">
+    <input type="text" value="<%=pc?.teachnology?.title%>" name="teachnology_title" class="px-3 py-2 w-full border border-gray-300 rounded-lg" placeholder="teachnology title">
+    <input type="text" value="<%=pc?.teachnology?.desc%>" name="teachnology_desc" class="px-3 py-2 w-full border border-gray-300 rounded-lg" placeholder="teachnology desc">
+    <div class="flex justify-between items-center py-2" >
+      <h4 class="font-bold">Teachnology</h4>
+      <button type="button" id="cta_add_teachnology_card" class="px-3 py-2 border border-gray-300 rounded-lg bg-green-500 text-white font-bold">Add video component</button>
+    </div>
+    <div id="teachnology_wrapper" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <%if(pc?.teachnology?.cards && pc?.teachnology?.cards.length>0){%>
+        <%pc.teachnology.cards.forEach(t=>{%>
+          <div class="instance relative">
+            <span class="remove-instance w-5 h-5 rounded-lg bg-red-500 text-white font-bold hover:cursor-pointer hover:scale-120 flex items-center justify-center absolute -top-2 right-1">X</span>
+            
+              <div class="p-2 border border-gray-300">
+                
+                <input value="<%=t.badge%>" type="text" _badge class="px-3 py-2 border border-gray-300 rounded-lg w-full" placeholder="badge">
+              <!-- image handle action -->
+            <div class="image_action">
+              <!-- <label for="">Image banner</label> -->
+              <div class="flex justify-between items-center mt-3">
+                <button
+                  type="button"
+                  class="flex-1 px-4 py-3 chooseImg rounded-lg border border-green-500"
+                >
+                  Chọn ảnh
+                </button>
+                <input
+                  type="text"
+                  value="<%=t.img_url%>"
+                  _img_url=""
+                  class=" flex-3 img_input w-full px-4 py-3 border border-gray-300 rounded-lg hidden"
+                  placeholder="img"
+                />
+              </div>
+              <div class="img_preview border border-gray-300 w-full h-[200px]">
+                <img
+                  src="/<%=t.img_url%>"
+                  class="w-full object-cover max-h-[200px]"
+                />
+              </div>
+            </div>
+            <!--  -->
+            <input type="text" value="<%=t.title%>" _label="" class="px-3 py-2 border border-gray-300 w-full rounded-lg" placeholder="title">
+            <textarea name="" _desc="" id="" class="px-3 py-2 border border-gray-300 w-full rounded-lg" placeholder="description"><%=t.desc%></textarea>
+              
+
+            </div>
+          </div>
+        <%})%>
+      <%}%>
+    </div>
+</section>
+<!-- =============== Featured ============ -->
+ <section class="border border-gray-300 rounded-lg">
+  <button
+    type="button"
+    onclick="toggleSection('featured')"
+    class="w-full flex justify-between p-3 font-medium"
+  >
+    Featured Section
+    <span>+</span>
+  </button>
+  <!-- Content -->
+  <div class="p-4" id="featured">
+    <input type="text" value="<%=pc?.is_featured?.title%>" name="featured_title" class="px-3 py-2 w-full border border-gray-300 rounded-lg" placeholder="featured title">
+    <div class="flex justify-between items-center py-2" >
+      <h4 class="font-bold">featured</h4>
+      <button type="button" id="cta_add_featured_card" class="px-3 py-2 border border-gray-300 rounded-lg bg-green-500 text-white font-bold">Add video component</button>
+    </div>
+    <div id="featured_wrapper" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <%if(pc?.is_featured?.cards && pc?.is_featured?.cards.length>0){%>
+        <%pc.is_featured.cards.forEach(f=>{%>
+          <div class="instance relative">
+            <span class=" remove-instance w-5 h-5 bg-red-500 rounded-full hover:scale-120 hover:cursor-pointer text-white font-bold absolute -top-2 right-1">X</span>
+            <div class="border border-gray-300 p-2">
+              <!-- image handle action -->
+              <div class="image_action">
+                <!-- <label for="">Image banner</label> -->
+                <div class="flex justify-between items-center mt-3">
+                  <button
+                    type="button"
+                    class="flex-1 px-4 py-3 chooseImg rounded-lg border border-green-500"
+                  >
+                    Chọn ảnh
+                  </button>
+                  <input
+                    type="text"
+                    _img_url
+                    value="<%=f.img_url%>"
+                    class=" flex-3 img_input w-full px-4 py-3 border border-gray-300 rounded-lg hidden"
+                    placeholder="img"
+                  />
+                </div>
+                <div class="img_preview border border-gray-300 w-full h-[200px]">
+                  <img
+                    src="/<%=f.img_url%>"
+                    class="w-full object-cover max-h-[200px]"
+                  />
+                </div>
+              </div>
+              <input type="text" value="<%=f.title%>" _label class="px-3 py-2 border border-gray-300 rounded-lg w-full "placeholder="title">
+              <input type="text" value="<%=f.desc%>" _desc class="px-3 py-2 border border-gray-300 rounded-lg w-full "placeholder="desc">
+            </div>
+          </div>
+        <%})%>
+      <%}%>
+    </div>
+</section>
+<!-- =============== Box_content ============ -->
+ <section class="border border-gray-300 rounded-lg">
+  <button
+    type="button"
+    onclick="toggleSection('box_content')"
+    class="w-full flex justify-between p-3 font-medium"
+  >
+    Box_content Section
+    <span>+</span>
+  </button>
+  <!-- Content -->
+  <div class="p-4" id="box_content">
+    <input type="text" value="<%=pc?.box_content?.title%>" name="box_content_title" class="px-3 py-2 w-full border border-gray-300 rounded-lg" placeholder="box_content title">
+    <!-- image handle action -->
+    <div class="image_action">
+      <!-- <label for="">Image banner</label> -->
+      <div class="flex justify-between items-center mt-3">
+        <button
+          type="button"
+          class="flex-1 px-4 py-3 chooseImg rounded-lg border border-green-500"
+        >
+          Chọn ảnh
+        </button>
+        <input
+          type="text"
+          value="<%=pc?.box_content?.img_url%>"
+          name="box_content_img_url"
+          class=" flex-3 img_input w-full px-4 py-3 border border-gray-300 rounded-lg hidden"
+          placeholder="img"
+        />
+      </div>
+      <div class="img_preview border border-gray-300 w-full h-[200px]">
+        <img
+          src="/<%=pc?.box_content?.img_url%>"
+          alt=""
+          class="w-full object-cover max-h-[200px]"
+        />
+      </div>
+    </div>
+    <textarea name="" id="box_content_list" class="px-3 py-2 border border-gray-300 rounded-lg w-full" placeholder="enter = 1 sentence"><%=pc?.box_content?.list.join("\n")%></textarea>
+</section>
+<!-- =============== Usage_instruction ============ -->
+ <section class="border border-gray-300 rounded-lg">
+  <button
+    type="button"
+    onclick="toggleSection('usage_instruction')"
+    class="w-full flex justify-between p-3 font-medium"
+  >
+    Usage_instruction Section
+    <span>+</span>
+  </button>
+  <!-- Content -->
+  <div class="p-4" id="usage_instruction">
+    <input type="text" value="<%=pc?.usage_instruction?.title%>" name="usage_instruction_title" class="px-3 py-2 w-full border border-gray-300 rounded-lg" placeholder="box_content title">
+    <div class="flex justify-between items-center py-2" >
+      <h4 class="font-bold">usage_instruction</h4>
+      <button type="button" id="cta_add_usage_instruction_card" class="px-3 py-2 border border-gray-300 rounded-lg bg-green-500 text-white font-bold">Add video component</button>
+    </div>
+    <div id="usage_instruction_wrapper" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <%if(pc?.usage_instruction?.cards && pc?.usage_instruction?.cards.length> 0){%>
+        <%pc?.usage_instruction?.cards.forEach(i=>{%>
+          <div class="instance relative">
+            <span class=" remove-instance w-5 h-5 bg-red-500 rounded-full hover:scale-120 hover:cursor-pointer text-white font-bold absolute -top-2 right-1">X</span>
+            <div class="border border-gray-300 p-2">
+            <!-- image handle action -->
+            <div class="image_action">
+              <!-- <label for="">Image banner</label> -->
+              <div class="flex justify-between items-center mt-3">
+                <button
+                  type="button"
+                  class="flex-1 px-4 py-3 chooseImg rounded-lg border border-green-500"
+                >
+                  Chọn ảnh
+                </button>
+                <input
+                  type="text"
+                  value="<%=i.img_url%>"
+                  _img_url
+                  class=" flex-3 img_input w-full px-4 py-3 border border-gray-300 rounded-lg hidden"
+                  placeholder="img"
+                />
+              </div>
+              <div class="img_preview border border-gray-300 w-full h-[200px]">
+                <img
+                  src="/<%=i.img_url%>"
+                  alt=""
+                  class="w-full object-cover max-h-[200px]"
+                />
+              </div>
+            </div> 
+            <div class="flex items-center">
+              <input value="<%=i.title%>" type="text" _label class="px-3 py-2 border border-gray-300 rounded-lg w-full "placeholder="title">
+              <input value="<%=i.step%>" type="number" _step class="px-3 py-2 border border-gray-300 rounded-lg w-full "placeholder="step">
+            </div>
+            <input value="<%=i.desc%>" type="text" _desc class="px-3 py-2 border border-gray-300 rounded-lg w-full "placeholder="desc">
+          </div>
+        </div>
+        <%})%>
+      <%}%>
+    </div>
+</section>
+<!-- =============== Body_area ============ -->
+ <section class="border border-gray-300 rounded-lg">
+  <button
+    type="button"
+    onclick="toggleSection('body_area')"
+    class="w-full flex justify-between p-3 font-medium"
+  >
+    Body_area Section
+    <span>+</span>
+  </button>
+  <!-- Content -->
+  <div class="p-4" id="body_area">
+    <input type="text" value="<%=pc?.body_area?.title%>" name="body_area_title" class="px-3 py-2 w-full border border-gray-300 rounded-lg" placeholder="box_content title">
+    <div class="flex justify-between items-center py-2" >
+      <h4 class="font-bold">body_area</h4>
+      <button type="button" id="cta_add_body_area_card" class="px-3 py-2 border border-gray-300 rounded-lg bg-green-500 text-white font-bold">Add video component</button>
+    </div>
+    <div id="body_area_wrapper" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <%if(pc?.body_area?.cards && pc?.body_area?.cards.length> 0){%>
+        <%pc?.body_area?.cards.forEach(i=>{%>
+          <div class="instance relative">
+            <span class=" remove-instance w-5 h-5 bg-red-500 rounded-full hover:scale-120 hover:cursor-pointer text-white font-bold absolute -top-2 right-1">X</span>
+            <div class="border border-gray-300 p-2">
+              <input value="<%=i.title%>" type="text" _label class="px-3 py-2 border border-gray-300 rounded-lg w-full "placeholder="title">
+            <!-- image handle action -->
+            <div class="image_action">
+              <!-- <label for="">Image banner</label> -->
+              <div class="flex justify-between items-center mt-3">
+                <button
+                  type="button"
+                  class="flex-1 px-4 py-3 chooseImg rounded-lg border border-green-500"
+                >
+                  Chọn ảnh
+                </button>
+                <input
+                  type="text"
+                  value="<%=i.img_url%>"
+                  _img_url
+                  class=" flex-3 img_input w-full px-4 py-3 border border-gray-300 rounded-lg hidden"
+                  placeholder="img"
+                />
+              </div>
+              <div class="img_preview border border-gray-300 w-full h-[200px]">
+                <img
+                  src="/<%=i.img_url%>"
+                  alt=""
+                  class="w-full object-cover max-h-[200px]"
+                />
+              </div>
+            </div> 
+            
+          </div>
+        </div>
+        <%})%>
+      <%}%>
+    </div>
+</section>
+<!-- =============== comparison ============ -->
+ <section class="border border-gray-300 rounded-lg">
+  <button
+    type="button"
+    onclick="toggleSection('comparison')"
+    class="w-full flex justify-between p-3 font-medium"
+  >
+    Comparison Section
+    <span>+</span>
+  </button>
+  <!-- Content -->
+  <div class="p-4" id="comparison">
+    <!-- <input type="text" value="<%#=pc?.comparison?.title%>" name="comparison_title" class="px-3 py-2 w-full border border-gray-300 rounded-lg" placeholder="box_content title"> -->
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <textarea name="" id="comparison_before" class="px-3 py-2 border border-gray-300 rounded-lg" placeholder="before"><%=pc?.comparison?.before.join('\n')%></textarea>
+      <textarea name="" id="comparison_after" class="px-3 py-2 border border-gray-300 rounded-lg" placeholder="after"><%=pc?.comparison?.after.join('\n')%></textarea>
+    </div>
+</section>
+  </div>
+</form>
+
+<!-- //============== TEMPLATE ===========// -->
+ <!-- ------------- USAGE INSTRUCTION ----------- -->
+<template id="usage_instruction_template">
+  <div class="instance relative">
+      <span class=" remove-instance w-5 h-5 bg-red-500 rounded-full hover:scale-120 hover:cursor-pointer text-white font-bold absolute -top-2 right-1">X</span>
+      <div class="border border-gray-300 p-2">
+      <!-- image handle action -->
+      <div class="image_action">
+        <!-- <label for="">Image banner</label> -->
+        <div class="flex justify-between items-center mt-3">
+          <button
+            type="button"
+            class="flex-1 px-4 py-3 chooseImg rounded-lg border border-green-500"
+          >
+            Chọn ảnh
+          </button>
+          <input
+            type="text"
+            _img_url
+            class=" flex-3 img_input w-full px-4 py-3 border border-gray-300 rounded-lg hidden"
+            placeholder="img"
+          />
+        </div>
+        <div class="img_preview border border-gray-300 w-full h-[200px]">
+          <img
+            alt=""
+            class="w-full object-cover max-h-[200px]"
+          />
+        </div>
+      </div> 
+      <div class="flex items-center">
+        <input type="text" _label class="px-3 py-2 border border-gray-300 rounded-lg w-full "placeholder="title">
+        <input type="number" _step class="px-3 py-2 border border-gray-300 rounded-lg w-full "placeholder="step">
+      </div>
+      <input type="text" _desc class="px-3 py-2 border border-gray-300 rounded-lg w-full "placeholder="desc">
+    </div>
+  </div>
+</template>
+<!-- ------------- BODY AREA ----------- -->
+<template id="body_area_template">
+  <div class="instance relative">
+      <span class=" remove-instance w-5 h-5 bg-red-500 rounded-full hover:scale-120 hover:cursor-pointer text-white font-bold absolute -top-2 right-1">X</span>
+      <div class="border border-gray-300 p-2">
+      <input type="text" _label class="px-3 py-2 border border-gray-300 rounded-lg w-full "placeholder="title">
+      <!-- image handle action -->
+      <div class="image_action">
+        <!-- <label for="">Image banner</label> -->
+        <div class="flex justify-between items-center mt-3">
+          <button
+            type="button"
+            class="flex-1 px-4 py-3 chooseImg rounded-lg border border-green-500"
+          >
+            Chọn ảnh
+          </button>
+          <input
+            type="text"
+            _img_url
+            class=" flex-3 img_input w-full px-4 py-3 border border-gray-300 rounded-lg hidden"
+            placeholder="img"
+          />
+        </div>
+        <div class="img_preview border border-gray-300 w-full h-[200px]">
+          <img
+            alt=""
+            class="w-full object-cover max-h-[200px]"
+          />
+        </div>
+      </div> 
+    </div>
+  </div>
+</template>
+<!-- ------------- FEATURED --------------- -->
+<template id="featured_template">
+<div class="instance relative">
+  <span class=" remove-instance w-5 h-5 bg-red-500 rounded-full hover:scale-120 hover:cursor-pointer text-white font-bold absolute -top-2 right-1">X</span>
+  <div class="border border-gray-300 p-2">
+    <!-- image handle action -->
+    <div class="image_action">
+      <!-- <label for="">Image banner</label> -->
+      <div class="flex justify-between items-center mt-3">
+        <button
+          type="button"
+          class="flex-1 px-4 py-3 chooseImg rounded-lg border border-green-500"
+        >
+          Chọn ảnh
+        </button>
+        <input
+          type="text"
+          _img_url=""
+          class=" flex-3 img_input w-full px-4 py-3 border border-gray-300 rounded-lg hidden"
+          placeholder="img"
+        />
+      </div>
+      <div class="img_preview border border-gray-300 w-full h-[200px]">
+        <img
+          alt=""
+          class="w-full object-cover max-h-[200px]"
+        />
+      </div>
+    </div>
+    <input type="text" _label class="px-3 py-2 border border-gray-300 rounded-lg w-full "placeholder="title">
+    <input type="text" _desc class="px-3 py-2 border border-gray-300 rounded-lg w-full "placeholder="desc">
+  </div>
+</div>
+</template>
+<!-- ------------ Teachnology -------------- -->
+ <template id="teachnolory_template">
+  <div class="instance relative">
+    <span class="remove-instance w-5 h-5 rounded-lg bg-red-500 text-white font-bold hover:cursor-pointer hover:scale-120 flex items-center justify-center absolute -top-2 right-1">X</span>
+    <div>
+      <div class="p-2 border border-gray-300">
+      
+        <input type="text" _badge class="px-3 py-2 border border-gray-300 rounded-lg w-full" placeholder="badge">
+      <!-- image handle action -->
+    <div class="image_action">
+      <!-- <label for="">Image banner</label> -->
+      <div class="flex justify-between items-center mt-3">
+        <button
+          type="button"
+          class="flex-1 px-4 py-3 chooseImg rounded-lg border border-green-500"
+        >
+          Chọn ảnh
+        </button>
+        <input
+          type="text"
+          _img_url=""
+          class=" flex-3 img_input w-full px-4 py-3 border border-gray-300 rounded-lg hidden"
+          placeholder="img"
+        />
+      </div>
+      <div class="img_preview border border-gray-300 w-full h-[200px]">
+        <img
+          alt=""
+          class="w-full object-cover max-h-[200px]"
+        />
+      </div>
+    </div>
+    <!--  -->
+    <input type="text" _label="" class="px-3 py-2 border border-gray-300 w-full rounded-lg" placeholder="title">
+    <textarea name="" _desc="" id="" class="px-3 py-2 border border-gray-300 w-full rounded-lg" placeholder="description"></textarea>
+      </div>
+
+    </div>
+  </div>
+ </template>
+<!-- ------------ REVIEW ------------------ -->
+<template id="review_template">
+  <div class="instance relative">
+    <span class="remove-instance w-5 h-5 rounded-lg bg-red-500 text-white font-bold hover:cursor-pointer hover:scale-120 flex items-center justify-center absolute -top-2 right-1">X</span>
+    <div class="p-3 border border-gray-300">
+      <input badge="" type="text" class="px-3 py-2 rounded-lg border border-gray-300 w-full" placeholder="lable">
+      <input lable="" type="text" class="px-3 py-3 rounded-lg border border-gray-300 w-full" placeholder="lable">
+      <textarea video="" name="" id="" class="px-3 py-2 border border-gray-300 w-full" placeholder="video_url"></textarea>
+    </div>
+  </div>
+</template>
+<!-- -------------- FEEDBACK -------------- -->
+ <template id="feedback_template">
+  <div class="instance relative border border-gray-300 p-2">
+    <span class="remove-instance w-5 h-5 rounded-lg bg-red-500 text-white font-bold hover:cursor-pointer hover:scale-120 flex items-center justify-center absolute -top-2 right-1">X</span>
+    <div>
+      <div class="flex">
+        <input lable="" type="text" class="px-3 py-2 rounded-lg border border-gray-300  w-full" placeholder="title">
+        <input star="" type="number" class="px-3 py-2 rounded-lg border border-gray-300  w-full" placeholder="star">
+      </div>
+      <textarea desc="" name="" id="" class="px-3 py-2 rounded-lg border border-gray-300 w-full" placeholder="commenment"></textarea>
+      <!-- <input type="text" class="px-3 py-2 rounded-lg border border-gray-300  w-full" placeholder="title"> -->
+    </div>
+  </div>
+ </template>
+<!-- ------------- TARGET_AUDIENCE ----------- -->
+<template id="target_audience_template">
+
+  <div class="instance border p-4 rounded mt-3">
+
+    <button
+      type="button"
+      class="remove-instance text-red-500 mb-2"
+    >
+      Remove
+    </button>
+
+
+    <div class="image_action">
+
+     <button
+        type="button"
+          class="flex-1 px-4 py-3 chooseImg rounded-lg border border-green-500"
+        >
+          Chọn ảnh
+        </button>
+    <input name="img_url" class="img_input hidden">
+      <div class="img_preview border mt-2 h-[150px]">
+        <img src="" class="w-full h-full object-cover">
+      </div>
+
+    </div>
+
+    <input
+      name="title"
+      placeholder="Card title"
+      class="border w-full px-3 py-2 rounded mt-2"
+    />
+
+    <textarea
+      name="desc"
+      placeholder="Description"
+      class="border w-full px-3 py-2 rounded mt-2"
+    ></textarea>
+
+  </div>
+
+</template>
+
+<!-- =================MODAL===================== -->
+<div
+  id="gallery_modal"
+  class="fixed inset-0 bg-black/50 items-center hidden justify-center"
+>
+  <div class="bg-white min-w-75 max-h-[80vh] rounded p-4 overflow-y-auto">
+    <div class="header flex justify-between mb-4">
+      <h2>Chon anh</h2>
+      <button onclick="closeChooseImgModal()">X</button>
+    </div>
+    <!--  -->
+    <div id="imgList" class="grid grid-cols-4 gap-4"></div>
+  </div>
+</div>
+<!-- //===================== -->
+ <script>
+  // ================ body area ============== //
+  const bodyAreaTemplate = document.querySelector('#body_area_template');
+  const bodyAreaWrapper = document.querySelector('#body_area_wrapper');
+  document.querySelector('#cta_add_body_area_card').addEventListener('click', (ev)=>{
+    const clone = bodyAreaTemplate.content.cloneNode(true);
+    bodyAreaWrapper.appendChild(clone);
+  });
+  bodyAreaWrapper.addEventListener('click', (ev)=>{
+    if(ev.target.classList.contains('remove-instance')){
+      const instance = ev.target.closest('.instance');
+      instance.remove();
+    }
+  })
+  // ================ usage_instruction =======//
+  const usageInstructionWrapper = document.querySelector('#usage_instruction_wrapper');
+  const usageInstructionTemplate = document.querySelector('#usage_instruction_template');
+
+  document.querySelector('#cta_add_usage_instruction_card').addEventListener('click', (ev)=>{
+    const clone = usageInstructionTemplate.content.cloneNode(true);
+    usageInstructionWrapper.appendChild(clone);
+  })
+  usageInstructionWrapper.addEventListener('click', (ev)=>{
+    if(ev.target.classList.contains('remove-instance')){
+      const instance = ev.target.closest('.instance');
+      instance.remove();
+    }
+  })
+
+  // ================= Featured ===============//
+  const featuredWrapper =document.querySelector('#featured_wrapper');
+  const featuredTemplate = document.querySelector('#featured_template');
+  document.querySelector('#cta_add_featured_card').addEventListener('click', (ev)=>{
+    const clone = featuredTemplate.content.cloneNode(true);
+    featuredWrapper.appendChild(clone);
+  });
+  featuredWrapper.addEventListener('click', (ev)=>{
+    if(ev.target.classList.contains('remove-instance')){
+      const instance = ev.target.closest('.instance');
+      instance.remove();
+    }
+  })
+  // =================teachnology ==========//
+  const teachnologyWrapper = document.querySelector('#teachnology_wrapper');
+  const teachnologyTemplate = document.querySelector('#teachnolory_template');
+  document.querySelector('#cta_add_teachnology_card').addEventListener('click', (ev)=>{
+    const clone = teachnologyTemplate.content.cloneNode(true);
+    teachnologyWrapper.appendChild(clone);
+  });
+  teachnologyWrapper.addEventListener('click', (ev)=>{
+    if(ev.target.classList.contains('remove-instance')){
+      const instance = ev.target.closest('.instance');
+      instance.remove();
+    }
+  })
+  // =============== review =============//
+  const reviewWarpper = document.querySelector('#review_wapper');
+  const reviewTemplate = document.querySelector('#review_template');
+  document.querySelector('#cta_add_review_card').addEventListener('click', (ev)=>{
+    // console.log('a')
+    const clone = reviewTemplate.content.cloneNode(true);
+    console.log(clone);
+    reviewWarpper.appendChild(clone);
+  });
+  reviewWarpper.addEventListener('click', (ev)=>{
+    if(ev.target.classList.contains("remove-instance")){
+      const instance = ev.target.closest('.instance');
+      instance.remove();
+    }
+  });
+  // ================= FeedBack ==============//
+  const feebdackWrapper = document.querySelector('#feedback_wapper');
+  const feedbackTemplate = document.querySelector('#feedback_template');
+
+  document.querySelector('#cta_add_feedback_card').addEventListener('click', (ev)=>{
+    const clone = feedbackTemplate.content.cloneNode(true);
+    feebdackWrapper.appendChild(clone);
+  })
+  feebdackWrapper.addEventListener('click', (ev)=>{
+    if(ev.target.classList.contains("remove-instance")){
+      const instance = ev.target.closest('.instance')
+      instance.remove();
+    }
+  })
+
+  
+
+ </script>
+ 
+
