@@ -14,6 +14,7 @@ const pageConfigSchema = new mongoose.Schema({
   purchase_frame:{
     title: String,
     countdown: Date,
+    floating_cta: String,
     sale: {
       presale: String,
       save_money: String,
@@ -82,6 +83,7 @@ const pageConfigSchema = new mongoose.Schema({
   },
   usage_instruction:{
     title: String,
+    note: String,
     cards: [
       {img_url: String, step: Number, title: String, desc: String}
     ],

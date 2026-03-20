@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+
+<html lang="vi">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Đơn hàng mới</title>
+</head>
+<body style="margin:0; padding:0; background:#f4f6f8; font-family:Arial, sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" bgcolor="#f4f6f8">
+    <tr>
+      <td align="center">
+
+    <!-- CONTAINER -->
+    <table width="100%" style="max-width:600px; background:#ffffff; border-radius:12px; overflow:hidden; margin-top:20px; margin-bottom: 20px;">
+      
+      <!-- HEADER -->
+      <tr>
+        <td style="background:#4f46e5; padding:20px; text-align:center; color:#fff;">
+          <h2 style="margin:0;">🚀 Thông báo đơn hàng mới</h2>
+        </td>
+      </tr>
+
+      <!-- CONTENT -->
+      <tr>
+        <td style="padding:24px;">
+          <h3 style="margin-top:0;">Xin chào Admin 👋</h3>
+          <p>Bạn vừa nhận được một đơn hàng mới từ hệ thống.</p>
+
+          <!-- BOX -->
+        <div style="background:#f9fafb; padding:16px; border-radius:8px; margin:20px 0;">
+        <table style="width:100%; border-collapse:collapse; border:1px solid #ccc;">
+            <tr>
+            <td style="border:1px solid #ccc; padding:8px; font-weight:bold;">Mã đơn:</td>
+            <td style="border:1px solid #ccc; padding:8px;">{{orderId}}</td>
+            </tr>
+            <tr>
+            <td style="border:1px solid #ccc; padding:8px; font-weight:bold;">Khách hàng:</td>
+            <td style="border:1px solid #ccc; padding:8px;">{{customerName}}</td>
+            </tr>
+            <tr>
+            <td style="border:1px solid #ccc; padding:8px; font-weight:bold;">Email:</td>
+            <td style="border:1px solid #ccc; padding:8px;">{{customerEmail}}</td>
+            </tr>
+            <tr>
+            <td style="border:1px solid #ccc; padding:8px; font-weight:bold;">Phone:</td>
+            <td style="border:1px solid #ccc; padding:8px;">{{customerPhone}}</td>
+            </tr>
+            <tr>
+            <td style="border:1px solid #ccc; padding:8px; font-weight:bold;">Tổng tiền:</td>
+            <td style="border:1px solid #ccc; padding:8px;">{{totalAmount}}</td>
+            </tr>
+        </table>
+        </div>
+
+          <p>Vui lòng kiểm tra và xử lý đơn hàng sớm nhất.</p>
+
+          <!-- BUTTON -->
+          <div style="text-align:center; margin:30px 0;">
+            <a href="{{orderLink}}" 
+               style="background:#4f46e5; color:#fff; padding:12px 20px; text-decoration:none; border-radius:6px; display:inline-block;">
+              Xem chi tiết đơn hàng
+            </a>
+          </div>
+
+          <p style="font-size:12px; color:#888;">
+            Đây là email tự động, vui lòng không trả lời.
+          </p>
+        </td>
+      </tr>
+
+      <!-- FOOTER -->
+      <tr>
+        <td style="background:#f1f5f9; padding:16px; text-align:center; font-size:12px; color:#666;">
+          © 2026 My App. All rights reserved.
+        </td>
+      </tr>
+
+    </table>
+
+  </td>
+</tr>
+
+  </table>
+</body>
+</html>

@@ -109,7 +109,15 @@
     />
     <!-- issues list -->
     <!-- <textarea name="purchase_issues" id="" class="border w-full px-3 py-2 rounded" placeholder="Xuong dong = 1 record"><%= pc?.issue?.issues?.join('\n') || '' %></textarea> -->
+     <h4 class="font-semibold pt-3">Floating CTA</h4>
 
+    <input
+      name="purchase_floating_cta"
+      value="<%=pc?.purchase_frame?.floating_cta||''%>"
+      placeholder="pre sale"
+      class="border w-full px-3 py-2 rounded"
+    />
+    <!--  -->
     <h4 class="font-semibold pt-3">Purchase Card</h4>
 
     <input
@@ -294,7 +302,7 @@
   <div class="p-4" id="review">
     <input type="text" value="<%=pc?.review?.title%>" name="review_title" class="px-3 py-2 w-full border border-gray-300 rounded-lg" placeholder="video title">
     <div class="flex justify-between items-center py-2" >
-      <h4 class="font-bold">video</h4>
+      <h4 class="font-bold">video <small class="text-red-500" >Link(youtube:[watch|short])</small></h4>
       <button type="button" id="cta_add_review_card" class="px-3 py-2 border border-gray-300 rounded-lg bg-green-500 text-white font-bold">Add video component</button>
     </div>
     <div id="review_wapper" class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -521,6 +529,7 @@
   <!-- Content -->
   <div class="p-4" id="usage_instruction">
     <input type="text" value="<%=pc?.usage_instruction?.title%>" name="usage_instruction_title" class="px-3 py-2 w-full border border-gray-300 rounded-lg" placeholder="box_content title">
+    <input type="text" value="<%=pc?.usage_instruction?.note%>" name="usage_instruction_note" class="px-3 py-2 w-full border border-gray-300 rounded-lg" placeholder="box_content note">
     <div class="flex justify-between items-center py-2" >
       <h4 class="font-bold">usage_instruction</h4>
       <button type="button" id="cta_add_usage_instruction_card" class="px-3 py-2 border border-gray-300 rounded-lg bg-green-500 text-white font-bold">Add video component</button>

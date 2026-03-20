@@ -28,6 +28,7 @@ const pageConfigController = () => {
           purchase_frame: {
             title: data.purchase_title,
             countdown: data.purchase_countdown,
+            floating_cta: data.purchase_floating_cta,
             sale: {
               presale: data.purchase_sale_presale,
               save_money: data.purchase_sale_save_money,
@@ -67,6 +68,7 @@ const pageConfigController = () => {
           },
           usage_instruction:{
             title: data.usage_instruction_title,
+            note: data.usage_instruction_note,
             cards: data.usage_instruction_cards
           },
           body_area: {

@@ -1,8 +1,3 @@
-/**
- * @license
- * SPDX-License-Identifier: Apache-2.0
- */
-
 import React, { useState, useEffect } from "react";
 import {
   Phone,
@@ -25,16 +20,14 @@ import {
 import { motion, AnimatePresence } from "motion/react";
 import LOGO_URL from "logo";
 import { formatPhone433, formatPhone442 } from "./utils/formatPhone.js";
-// --- Constants & Assets ---
-const PRIMARY_COLOR = "emerald"; // Green theme
-const PRODUCT_HERO = "input_file_4.png";
-const TECH_LABELS = "input_file_0.png";
-const BOX_CONTENT = "input_file_1.png";
-const USAGE_IMAGE = "input_file_2.png";
-const DIAGRAM_IMAGE = "input_file_3.png";
+import axios from "axios";
+import VideoCard from "./utils/VideoCard.js";
+import { Helmet } from "react-helmet-async";
 
 // http://localhost:8082/
-const ASSET_URL = "/"; 
+const ASSET_URL = "/"; //deploy thay => / "http://localhost:8082/
+const apiFetchLocal = "/api"; //deploy => /api http://localhost:8082/api
+
 // --- Simulated Data ---
 const VIETNAMESE_NAMES = [
   "Nguyễn Văn An",
@@ -63,7 +56,7 @@ const LOCATIONS = [
 
 // --- Components ---
 
-const OrderNotification = () => {
+const OrderNotification = ({data: any}) => {
   const [order, setOrder] = useState<{
     name: string;
     location: string;
@@ -231,7 +224,33 @@ const CountdownTimer = () => {
 };
 
 const PurchaseFrame = ({ id, data }: { id?: string; data: any }) => {
-  console.log(data?.purchase_frame?.title);
+  //handle form
+  const [form, setForm] = useState({
+    name: "",
+    phone: "",
+    address: "",
+    email: "",
+  });
+  //dandle text
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
+  ) => {
+    setForm({
+      ...form,
+      [e.target.name]: e.target.value,
+    });
+  };
+  //submit
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    try {
+      const res = await axios.post(apiFetchLocal + "/order", form);
+      console.log("tra ve gi ", res);
+      alert("Đặt đơn thành công");
+    } catch (error) {
+      alert("Có lỗi xảy ra");
+    }
+  };
   return (
     <div
       id={id}
@@ -277,9 +296,12 @@ const PurchaseFrame = ({ id, data }: { id?: string; data: any }) => {
           </div>
         </div>
 
-        <form className="space-y-4" onSubmit={(e) => e.preventDefault()}>
+        <form className="space-y-4" onSubmit={handleSubmit}>
           <div className="relative">
             <input
+              required
+              name="name"
+              onChange={handleChange}
               type="text"
               placeholder="Họ và tên của bạn"
               className="w-full px-4 py-4 rounded-xl border-2 border-gray-100 focus:border-emerald-500 outline-none transition-all text-sm font-medium placeholder:text-gray-400 placeholder:font-bold"
@@ -287,19 +309,38 @@ const PurchaseFrame = ({ id, data }: { id?: string; data: any }) => {
           </div>
           <div className="relative">
             <input
+              required
+              name="phone"
+              onChange={handleChange}
               type="tel"
               placeholder="Số điện thoại liên hệ"
               className="w-full px-4 py-4 rounded-xl border-2 border-gray-100 focus:border-emerald-500 outline-none transition-all text-sm font-medium placeholder:text-gray-400 placeholder:font-bold"
             />
           </div>
           <div className="relative">
+            <input
+              required
+              name="email"
+              onChange={handleChange}
+              type="email"
+              placeholder="Email liên hệ"
+              className="w-full px-4 py-4 rounded-xl border-2 border-gray-100 focus:border-emerald-500 outline-none transition-all text-sm font-medium placeholder:text-gray-400 placeholder:font-bold"
+            />
+          </div>
+          <div className="relative">
             <textarea
+              required
+              name="address"
+              onChange={handleChange}
               placeholder="Địa chỉ nhận hàng chi tiết"
               className="w-full px-4 py-4 rounded-xl border-2 border-gray-100 focus:border-emerald-500 outline-none transition-all h-24 text-sm font-medium placeholder:text-gray-400 placeholder:font-bold resize-none"
             ></textarea>
           </div>
 
-          <button className="w-full bg-emerald-600 text-white py-4 rounded-xl font-bold text-lg shadow-lg shadow-emerald-100 hover:bg-emerald-700 active:scale-[0.98] transition-all mt-2 uppercase tracking-wide">
+          <button
+            type="submit"
+            className="w-full bg-emerald-600 text-white py-4 rounded-xl font-bold text-lg shadow-lg shadow-emerald-100 hover:bg-emerald-700 active:scale-[0.98] transition-all mt-2 uppercase tracking-wide"
+          >
             ĐẶT HÀNG NGAY
           </button>
         </form>
@@ -353,7 +394,7 @@ const Hero: React.FC<any> = ({ data }) => {
 
         <div className="relative mb-8">
           <img
-            src={"https://picsum.photos/seed/tech1/600/400"}
+            src={ASSET_URL + data?.hero?.img_url}
             alt="LPA12 Usage"
             className="w-full rounded-3xl shadow-xl border-4 border-white"
             referrerPolicy="no-referrer"
@@ -388,7 +429,7 @@ const Hero: React.FC<any> = ({ data }) => {
   );
 };
 
-const TargetAudience = ({data}) => {
+const TargetAudience = ({ data }) => {
   const targets = [
     {
       title: "Người ngồi làm việc lâu",
@@ -421,7 +462,7 @@ const TargetAudience = ({data}) => {
             >
               <div className="w-1/2">
                 <img
-                  src={ASSET_URL+t.img_url}
+                  src={ASSET_URL + t.img_url}
                   alt={t.title}
                   className="w-full rounded-2xl shadow-md border-2 border-white"
                   referrerPolicy="no-referrer"
@@ -443,8 +484,8 @@ const TargetAudience = ({data}) => {
   );
 };
 
-const VideoReviews = ({data}) => {
-  console.log(data)
+const VideoReviews = ({ data }) => {
+  // console.log(data);
   const videos = data?.review?.videos;
   // [
   //   { title: "Video đập hộp", label: "Unboxing" },
@@ -461,29 +502,15 @@ const VideoReviews = ({data}) => {
         </h2>
         <div className="grid grid-cols-2 gap-4">
           {videos.map((v, i) => (
-            <div
+            <VideoCard
               key={i}
-              className="relative aspect-[9/16] bg-gray-200 rounded-2xl overflow-hidden group"
-            >
-              <img
-                src={ASSET_URL+v.video_url}
-                alt={v.title}
-                className="w-full h-full object-cover opacity-80"
-                referrerPolicy="no-referrer"
-              />
-              <div className="absolute inset-0 flex flex-col items-center justify-center text-white bg-black/20">
-                <PlayCircle
-                  size={48}
-                  className="mb-2 opacity-80 group-hover:scale-110 transition-transform"
-                />
-                <span className="text-xs font-bold text-center px-2">
-                  {v.lable}
-                </span>
-              </div>
-              <div className="absolute top-2 left-2 bg-emerald-500 text-white text-[10px] px-2 py-0.5 rounded-full font-bold">
-                {v.badge}
-              </div>
-            </div>
+              title={v.title}
+              label={v.lable}
+              badge={v.badge}
+              videoUrl={v.video_url}
+              assetUrl={ASSET_URL}
+              fallbackImage="/image/no_video.png" // ảnh mặc định
+            />
           ))}
         </div>
       </div>
@@ -491,7 +518,7 @@ const VideoReviews = ({data}) => {
   );
 };
 
-const TechDeepDive = ({data}) => {
+const TechDeepDive = ({ data }) => {
   // const techs = [
   //   {
   //     title: "15 CHƯƠNG TRÌNH TENS",
@@ -543,7 +570,7 @@ const TechDeepDive = ({data}) => {
                 className={`w-full aspect-video rounded-3xl overflow-hidden mb-4 shadow-lg`}
               >
                 <img
-                  src={ASSET_URL+t.img_url}
+                  src={ASSET_URL + t.img_url}
                   alt={t.title}
                   className="w-full h-full object-cover"
                   referrerPolicy="no-referrer"
@@ -567,7 +594,7 @@ const TechDeepDive = ({data}) => {
   );
 };
 
-const KeyFeatures = ({data}) => {
+const KeyFeatures = ({ data }) => {
   // const features = [
   //   {
   //     title: "2 kênh độc lập",
@@ -621,7 +648,7 @@ const KeyFeatures = ({data}) => {
             >
               <div className="w-1/2">
                 <img
-                  src={ASSET_URL+f.img_url}
+                  src={ASSET_URL + f.img_url}
                   alt={f.title}
                   className="w-full rounded-2xl shadow-lg border border-white/10"
                   referrerPolicy="no-referrer"
@@ -647,7 +674,7 @@ const KeyFeatures = ({data}) => {
   );
 };
 
-const BoxContent = ({data}) => {
+const BoxContent = ({ data }) => {
   // const items = [
   //   "Hướng dẫn nhanh x1",
   //   "Sách hướng dẫn sử dụng x1",
@@ -666,7 +693,7 @@ const BoxContent = ({data}) => {
         <div className="flex items-center gap-6">
           <div className="w-1/2">
             <img
-              src={ASSET_URL+data?.box_content?.img_url}
+              src={ASSET_URL + data?.box_content?.img_url}
               alt="Box Content"
               className="w-full rounded-2xl shadow-md"
               referrerPolicy="no-referrer"
@@ -688,7 +715,7 @@ const BoxContent = ({data}) => {
   );
 };
 
-const UsageSteps = ({data}) => {
+const UsageSteps = ({ data }) => {
   // const steps = [
   //   {
   //     step: "Bước 1",
@@ -731,7 +758,7 @@ const UsageSteps = ({data}) => {
             >
               <div className="w-1/2">
                 <img
-                  src={ASSET_URL+s.img_url}
+                  src={ASSET_URL + s.img_url}
                   alt={s.title}
                   className="w-full rounded-2xl shadow-md border-2 border-white"
                   referrerPolicy="no-referrer"
@@ -739,7 +766,7 @@ const UsageSteps = ({data}) => {
               </div>
               <div className="w-1/2">
                 <div className="w-8 h-8 bg-emerald-600 text-white rounded-full flex items-center justify-center font-bold text-xs mb-3">
-                   {i + 1}
+                  {i + 1}
                 </div>
                 <p className="text-[10px] font-bold text-emerald-600 uppercase tracking-widest mb-1">
                   Bước{s.step}
@@ -755,14 +782,14 @@ const UsageSteps = ({data}) => {
           ))}
         </div>
         <p className="mt-12 text-center text-sm text-gray-600 italic font-medium px-4">
-          "Sau đó bạn chỉ cần thư giãn và để thiết bị hoạt động."
+          {data?.note}
         </p>
       </div>
     </section>
   );
 };
 
-const BodyAreas = ({data}) => {
+const BodyAreas = ({ data }) => {
   // const areas = [
   //   { name: "Cổ vai gáy", img: "https://picsum.photos/seed/neck/300/300" },
   //   { name: "Lưng", img: "https://picsum.photos/seed/back/300/300" },
@@ -772,7 +799,7 @@ const BodyAreas = ({data}) => {
   //   { name: "Chân", img: "https://picsum.photos/seed/leg/300/300" },
   // ];
 
-  const areas =data?.cards;
+  const areas = data?.cards;
   return (
     <section className="py-12 px-4 bg-white">
       <div className="max-w-md mx-auto">
@@ -786,7 +813,7 @@ const BodyAreas = ({data}) => {
               className="relative aspect-square rounded-2xl overflow-hidden group"
             >
               <img
-                src={ASSET_URL+area.img_url}
+                src={ASSET_URL + area.img_url}
                 alt={area.name}
                 className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                 referrerPolicy="no-referrer"
@@ -812,7 +839,7 @@ const BodyAreas = ({data}) => {
   );
 };
 
-const BeforeAfter = ({data}) => {
+const BeforeAfter = ({ data }) => {
   return (
     <section className="py-12 px-4 bg-gray-900 text-white">
       <div className="max-w-md mx-auto">
@@ -823,10 +850,8 @@ const BeforeAfter = ({data}) => {
               Trước khi dùng
             </p>
             <ul className="space-y-2 text-[11px] text-gray-400">
-              {data?.before?.map((b, i)=>{
-                return (
-                  <li>• {b}</li>
-                )
+              {data?.before?.map((b, i) => {
+                return <li key={i}>• {b}</li>;
               })}
             </ul>
           </div>
@@ -835,10 +860,8 @@ const BeforeAfter = ({data}) => {
               Sau khi dùng
             </p>
             <ul className="space-y-2 text-[11px] text-emerald-100">
-              {data?.after?.map((a, i)=>{
-                return (
-                  <li>• {a}</li>
-                )
+              {data?.after?.map((a, i) => {
+                return <li key={i}>• {a}</li>;
               })}
             </ul>
           </div>
@@ -848,8 +871,7 @@ const BeforeAfter = ({data}) => {
   );
 };
 
-const Policies = ({data}) => {
-
+const Policies = ({ data }) => {
   return (
     <section className="py-8 px-4 bg-white border-y border-gray-100">
       <div className="max-w-md mx-auto grid grid-cols-2 gap-4">
@@ -858,7 +880,9 @@ const Policies = ({data}) => {
             key={i}
             className="flex items-center gap-3 bg-gray-50 p-3 rounded-xl"
           >
-            <div className="text-emerald-600">{<CircleCheckBig  size={20}/>}</div>
+            <div className="text-emerald-600">
+              {<CircleCheckBig size={20} />}
+            </div>
             <span className="text-[10px] font-bold text-gray-700 uppercase">
               {item}
             </span>
@@ -869,7 +893,7 @@ const Policies = ({data}) => {
   );
 };
 
-const Footer = ({data}) => {
+const Footer = ({ data }) => {
   return (
     <footer className="bg-gray-900 text-white py-12 px-4 pb-32">
       <div className="max-w-md mx-auto">
@@ -882,13 +906,15 @@ const Footer = ({data}) => {
         <h4 className="font-bold text-lg mb-4">{data?.worktime}</h4>
         <ul className="space-y-3 text-sm text-gray-400">
           <li className="flex gap-2">
-            <span className="text-white font-bold whitespace-nowrap">Địa chỉ:</span>
+            <span className="text-white font-bold whitespace-nowrap">
+              Địa chỉ:
+            </span>
             {data?.address}
           </li>
           <li className="flex gap-2">
             <a href="tel:+">
               <span className="text-white font-bold">Hotline: </span>
-            {formatPhone433(data?.phone)}
+              {formatPhone433(data?.phone)}
             </a>
           </li>
         </ul>
@@ -904,11 +930,10 @@ const Footer = ({data}) => {
 
 export default function App() {
   const [pageData, setPageData] = useState(null);
-  const apiLocal = "http://localhost:8082/api/landing";
-  const apiDeploy = "/api/landing";
+  const apiLandingPage = apiFetchLocal + "/landing";
 
   useEffect(() => {
-    fetch(apiDeploy)
+    fetch(apiLandingPage)
       .then((res) => res.json())
       .then((data) => {
         console.log(data.data);
@@ -923,102 +948,139 @@ export default function App() {
     );
   }
   return (
-    <div className="min-h-screen bg-white font-sans text-gray-900 selection:bg-emerald-100 selection:text-emerald-600">
-      <Header data={pageData} />
-      <main className="max-w-md mx-auto shadow-2xl bg-white min-h-screen">
-        <Hero data={pageData} />
-        <Policies data={pageData}/>
-        <TargetAudience data={pageData}  />
-        <VideoReviews data={pageData} />
+    <>
+      <Helmet>
+        {/* Title */}
+        <title>{pageData?.customize?.title}</title>
 
-        {/* Customer Feedback Placeholder */}
-        <section className="py-12 px-4 bg-white">
-          <div className="max-w-md mx-auto">
-            <h2 className="text-xl font-bold text-gray-900 mb-6 text-center">
-              {pageData?.feedback?.title}
-            </h2>
-            <div className="flex justify-center items-center gap-1 mb-6">
-              {[1, 2, 3, 4, 5].map((i) => (
-                <Star
-                  key={i}
-                  size={20}
-                  fill="#fbbf24"
-                  className="text-yellow-400"
-                />
-              ))}
-              <span className="ml-2 font-bold text-gray-900">
-                4.9/5 (4 đánh giá)
-              </span>
-            </div>
-            <div className="space-y-4">
-              {
-              // [1, 2, 3, 4]
-              pageData?.feedback?.list
-              .map((f,i) => (
-                <div
-                  key={i}
-                  className="p-4 bg-gray-50 rounded-2xl border border-gray-100"
-                >
-                  <div className="flex justify-between items-center mb-2">
-                    <span className="font-bold text-sm">
-                      {f.title}
-                    </span>
-                    <div className="flex text-yellow-400">
-                      {
-                      Array?.from({length: f.star})?.map((_, z)=>(
-                        <Star key={z} size={10} fill="currentColor" />
-                      ))
-                      // [1, 2, 3, 4, 5].map((j) => (
-                      //   <Star key={j} size={10} fill="currentColor" />
-                      // ))
-                      }
+        {/* Basic SEO */}
+        <meta name="description" content={pageData?.customize?.desc} />
+
+        <meta name="keywords" content={pageData?.customize?.keywords} />
+
+        <meta name="robots" content="index, follow" />
+
+        {/* Open Graph (Facebook, Zalo) */}
+        <meta property="og:title" content={pageData?.customize?.title} />
+        <meta
+          property="og:description"
+          content={pageData?.customize?.keywords}
+        />
+        <meta
+          property="og:image"
+          content={pageData?.customize?.canonical + pageData?.customize?.img}
+        />
+        <meta property="og:type" content="website" />
+        <meta property="og:url" content={pageData?.customize?.canonical} />
+        <meta property="og:site_name" content="CES Toppilife" />
+
+        {/* Twitter */}
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={pageData?.customize?.title} />
+        <meta name="twitter:description" content={pageData?.customize?.desc} />
+        <meta
+          name="twitter:image"
+          content={pageData?.customize?.canonical + pageData?.customize?.img}
+        />
+
+        {/* Mobile */}
+        {/* <meta name="viewport" content="width=device-width, initial-scale=1" /> */}
+
+        {/* Canonical */}
+        <link rel="canonical" href={pageData?.customize?.canonical || ""} />
+      </Helmet>
+      <div className="min-h-screen bg-white font-sans text-gray-900 selection:bg-emerald-100 selection:text-emerald-600">
+        <Header data={pageData} />
+        <main className="max-w-md mx-auto shadow-2xl bg-white min-h-screen">
+          <Hero data={pageData} />
+          <Policies data={pageData} />
+          <TargetAudience data={pageData} />
+          <VideoReviews data={pageData} />
+
+          {/* Customer Feedback Placeholder */}
+          <section className="py-12 px-4 bg-white">
+            <div className="max-w-md mx-auto">
+              <h2 className="text-xl font-bold text-gray-900 mb-6 text-center">
+                {pageData?.feedback?.title}
+              </h2>
+              <div className="flex justify-center items-center gap-1 mb-6">
+                {[1, 2, 3, 4, 5].map((i) => (
+                  <Star
+                    key={i}
+                    size={20}
+                    fill="#fbbf24"
+                    className="text-yellow-400"
+                  />
+                ))}
+                <span className="ml-2 font-bold text-gray-900">
+                  4.9/5 (4 đánh giá)
+                </span>
+              </div>
+              <div className="space-y-4">
+                {// [1, 2, 3, 4]
+                pageData?.feedback?.list.map((f, i) => (
+                  <div
+                    key={i}
+                    className="p-4 bg-gray-50 rounded-2xl border border-gray-100"
+                  >
+                    <div className="flex justify-between items-center mb-2">
+                      <span className="font-bold text-sm">{f.title}</span>
+                      <div className="flex text-yellow-400">
+                        {Array?.from({ length: f.star })?.map((_, z) => (
+                          <Star key={z} size={10} fill="currentColor" />
+                        ))
+                        // [1, 2, 3, 4, 5].map((j) => (
+                        //   <Star key={j} size={10} fill="currentColor" />
+                        // ))
+                        }
+                      </div>
                     </div>
+                    <p className="text-xs text-gray-600 leading-relaxed italic">
+                      {f.desc}
+                    </p>
                   </div>
-                  <p className="text-xs text-gray-600 leading-relaxed italic">
-                    {f.desc}
-                  </p>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
-          </div>
-        </section>
+          </section>
 
-        <TechDeepDive data={pageData} />
-        <KeyFeatures data={pageData} />
-        <BoxContent data={pageData}/>
-        <UsageSteps data={pageData?.usage_instruction} />
-        <BodyAreas data={pageData?.body_area} />
-        <BeforeAfter data={pageData?.comparison} />
+          <TechDeepDive data={pageData} />
+          <KeyFeatures data={pageData} />
+          <BoxContent data={pageData} />
+          <UsageSteps data={pageData?.usage_instruction} />
+          <BodyAreas data={pageData?.body_area} />
+          <BeforeAfter data={pageData?.comparison} />
 
-        {/* Final CTA */}
-        <section className="py-16 px-4 bg-emerald-50 text-center">
-          <h2 className="text-2xl font-black text-gray-900 mb-4 uppercase">
-            Sẵn sàng chăm sóc sức khỏe?
-          </h2>
-          <p className="text-gray-600 text-sm mb-8">
-            Đừng để những cơn đau mỏi làm phiền cuộc sống của bạn.
-          </p>
-          <PurchaseFrame id="final-order" data={pageData} />
-        </section>
-      </main>
+          {/* Final CTA */}
+          <section className="py-16 px-4 bg-emerald-50 text-center">
+            <h2 className="text-2xl font-black text-gray-900 mb-4 uppercase">
+              Sẵn sàng chăm sóc sức khỏe?
+            </h2>
+            <p className="text-gray-600 text-sm mb-8">
+              Đừng để những cơn đau mỏi làm phiền cuộc sống của bạn.
+            </p>
+            <PurchaseFrame id="final-order" data={pageData} />
+          </section>
+        </main>
 
-      <Footer data={pageData?.customize} />
-      <OrderNotification />
+        <Footer data={pageData?.customize} />
+        <OrderNotification data={pageData?.purchase_frame} />
 
-      {/* Floating Mobile CTA */}
-      <div className="fixed bottom-6 left-6 right-6 z-40 max-w-md mx-auto">
-        <button
-          onClick={() =>
-            document
-              .getElementById("final-order")
-              ?.scrollIntoView({ behavior: "smooth" })
-          }
-          className="w-full bg-emerald-600 text-white py-4 rounded-2xl font-bold shadow-2xl flex items-center justify-center gap-2 animate-pulse"
-        >
-          <Zap size={20} />
-          MUA NGAY - GIẢM 30%
-        </button>
+        {/* Floating Mobile CTA */}
+        <div className="fixed bottom-6 left-6 right-6 z-40 max-w-md mx-auto">
+          <button
+            onClick={() =>
+              document
+                .getElementById("final-order")
+                ?.scrollIntoView({ behavior: "smooth" })
+            }
+            className="w-full bg-emerald-600 text-white py-4 rounded-2xl font-bold shadow-2xl flex items-center justify-center gap-2 animate-pulse"
+          >
+            <Zap size={20} />
+            {pageData?.purchase_frame?.floating_cta}
+          </button>
+        </div>
       </div>
-    </div>
+    </>
   );
 }
