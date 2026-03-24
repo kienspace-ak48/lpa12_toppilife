@@ -6,6 +6,12 @@ const orderSchame = new mongoose.Schema(
     phone: { type: String, default: "" },
     address: { type: String, default: "" },
     email: { type: String, default: "" },
+    status: {
+      type: String,
+      enum: ["new", "processing", "completed", "cancelled"],
+      default: "new",
+    },
+    isDeleted: { type: Boolean, default: false },
   },
   { timestamps: true }
 );

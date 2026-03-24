@@ -38,13 +38,24 @@
     </button>
     <!-- user profile -->
     <div
-      class="flex items-center gap-3 cursor-pointer hover:bg-gray-200 px-2 py-1 rounded-lg transition"
+      class="relative flex items-center gap-3 cursor-pointer hover:bg-gray-200 px-2 py-1 rounded-lg transition group"
     >
       <!-- <img src="" alt="" /> -->
        <i class="fa-solid fa-user-shield"></i>
       <div class="hidden md:block leading-light">
         <p class="text-sm font-medium">Admin</p>
         <p class="text-xs text-gray-500">Supper Admin</p>
+      </div>
+      <!-- z-index -->
+      <div class="absolute top-full right-0 bg-white shadow-md rounded-lg p-2 z-50 hidden group-hover:block">
+        <!-- <a href="/admin/profile" class="block px-3 py-2 text-sm rounded-lg hover:bg-gray-100 transition">
+          <span class="menu-text">Profile</span>
+        </a> -->
+        <form action="/auth/admin/logout" method="POST">
+          <button type="submit" class="block w-full text-left px-3 py-2 text-sm rounded-lg hover:bg-gray-100 transition">
+            <span class="menu-text">Logout</span>
+          </button>
+        </form>
       </div>
     </div>
   </div>

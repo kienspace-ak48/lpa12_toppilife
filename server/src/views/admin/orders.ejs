@@ -1,0 +1,141 @@
+<h1 class="text-xl font-bold mb-4">Order management</h1>
+
+<form method="GET" action="/admin/orders" class="grid grid-cols-1 md:grid-cols-4 gap-3 mb-5">
+  <input
+    type="text"
+    name="keyword"
+    value="<%= filter.keyword %>"
+    placeholder="Search name, phone, email..."
+    class="px-4 py-2 border border-gray-300 rounded-lg md:col-span-2"
+  />
+  <select name="status" class="px-4 py-2 border border-gray-300 rounded-lg">
+    <option value="">All status</option>
+    <% statuses.forEach(function(s){ %>
+      <option value="<%= s %>" <%= filter.status === s ? "selected" : "" %>><%= s %></option>
+    <% }) %>
+  </select>
+  <button type="submit" class="px-4 py-2 border border-blue-500 text-blue-600 rounded-lg font-semibold">
+    Filter
+  </button>
+</form>
+
+<div class="overflow-x-auto border rounded-lg">
+  <table class="w-full text-sm">
+    <thead class="bg-gray-50">
+      <tr class="border-b">
+        <th class="p-3 text-left">Name</th>
+        <th class="p-3 text-left">Phone</th>
+        <th class="p-3 text-left">Email</th>
+        <th class="p-3 text-left">Address</th>
+        <th class="p-3 text-left">Status</th>
+        <th class="p-3 text-left">Created</th>
+        <th class="p-3 text-left">Actions</th>
+      </tr>
+    </thead>
+    <tbody>
+      <% if (!orders || orders.length === 0) { %>
+        <tr>
+          <td colspan="7" class="p-4 text-center text-gray-500">No orders found</td>
+        </tr>
+      <% } %>
+      <% (orders || []).forEach(function(order){ %>
+        <tr class="border-b hover:bg-gray-50" data-row-id="<%= order._id %>">
+          <td class="p-3"><%= order.name %></td>
+          <td class="p-3"><%= order.phone %></td>
+          <td class="p-3"><%= order.email %></td>
+          <td class="p-3"><%= order.address %></td>
+          <td class="p-3">
+            <select class="border border-gray-300 rounded px-2 py-1 text-xs status-select">
+              <% statuses.forEach(function(s){ %>
+                <option value="<%= s %>" <%= order.status === s ? "selected" : "" %>><%= s %></option>
+              <% }) %>
+            </select>
+          </td>
+          <td class="p-3"><%= new Date(order.createdAt).toLocaleString() %></td>
+          <td class="p-3 space-x-2">
+            <button
+              type="button"
+              class="px-3 py-1 text-xs border border-green-500 text-green-600 rounded update-status-btn"
+              data-id="<%= order._id %>"
+            >
+              Update
+            </button>
+            <button
+              type="button"
+              class="px-3 py-1 text-xs border border-red-500 text-red-600 rounded delete-order-btn"
+              data-id="<%= order._id %>"
+            >
+              Delete
+            </button>
+          </td>
+        </tr>
+      <% }) %>
+    </tbody>
+  </table>
+</div>
+
+<div class="mt-4 flex items-center justify-between text-sm">
+  <p>Total: <strong><%= pagination.total %></strong> orders</p>
+  <div class="space-x-2">
+    <% const prevPage = Math.max(1, pagination.page - 1); %>
+    <% const nextPage = Math.min(pagination.totalPages, pagination.page + 1); %>
+    <a
+      class="px-3 py-1 border rounded <%= pagination.page <= 1 ? 'pointer-events-none opacity-50' : '' %>"
+      href="/admin/orders?page=<%= prevPage %>&limit=<%= pagination.limit %>&status=<%= filter.status %>&keyword=<%= encodeURIComponent(filter.keyword || '') %>"
+    >Prev</a>
+    <span>Page <%= pagination.page %>/<%= pagination.totalPages %></span>
+    <a
+      class="px-3 py-1 border rounded <%= pagination.page >= pagination.totalPages ? 'pointer-events-none opacity-50' : '' %>"
+      href="/admin/orders?page=<%= nextPage %>&limit=<%= pagination.limit %>&status=<%= filter.status %>&keyword=<%= encodeURIComponent(filter.keyword || '') %>"
+    >Next</a>
+  </div>
+</div>
+
+<script>
+  async function updateOrderStatus(id, status) {
+    const res = await fetch(`/admin/orders/${id}/status`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ status }),
+    });
+    return res.json();
+  }
+
+  async function deleteOrder(id) {
+    const res = await fetch(`/admin/orders/${id}`, {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+    });
+    return res.json();
+  }
+
+  document.querySelectorAll(".update-status-btn").forEach((btn) => {
+    btn.addEventListener("click", async () => {
+      const id = btn.dataset.id;
+      const row = document.querySelector(`tr[data-row-id="${id}"]`);
+      const status = row.querySelector(".status-select").value;
+      try {
+        const result = await updateOrderStatus(id, status);
+        if (!result.success) return alert("Update status failed");
+        alert("Updated successfully");
+      } catch (error) {
+        alert("Update status failed");
+      }
+    });
+  });
+
+  document.querySelectorAll(".delete-order-btn").forEach((btn) => {
+    btn.addEventListener("click", async () => {
+      const id = btn.dataset.id;
+      if (!confirm("Delete this order?")) return;
+      try {
+        const result = await deleteOrder(id);
+        if (!result.success) return alert("Delete order failed");
+        const row = document.querySelector(`tr[data-row-id="${id}"]`);
+        if (row) row.remove();
+      } catch (error) {
+        alert("Delete order failed");
+      }
+    });
+  });
+</script>

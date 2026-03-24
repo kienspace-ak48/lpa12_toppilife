@@ -4,6 +4,7 @@ const router = express.Router();
 const galleryController = require("../controller/gallery.controller")();
 const homeController = require('../controller/home.controller')();
 const pageConfigController = require('../controller/pageConfig.controller')();
+const orderAdminController = require("../controller/order.admin.controller")();
 const uploadImage = require("../config/uploadImage.config");
 const visitModel = require('../model/visit.model')
 
@@ -33,6 +34,10 @@ router.post('/gallery/image-upload-ajax',uploadImage.single("image"),
   next();
 },galleryController.UploadImage);
 router.delete('/gallery/image-delete-ajax', galleryController.DeleteImageAjax);
+
+router.get("/orders", orderAdminController.Index);
+router.patch("/orders/:id/status", orderAdminController.UpdateStatus);
+router.delete("/orders/:id", orderAdminController.SoftDelete);
 
 router.get("/", async (req, res) => {
   const total = await visitModel.countDocuments();

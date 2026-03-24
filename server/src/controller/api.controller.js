@@ -1,6 +1,3 @@
-const fs = require("fs");
-const path = require("path");
-const { sendMail } = require("../services/mail.service");
 const orderService = require("../services/order.service");
 
 const CNAME = "api.controller.js ";
@@ -10,7 +7,7 @@ const apiController = () => {
     Order: async (req, res) => {
       try {
         const data = req.body;
-        console.log(data);
+        // console.log(data);
         const oDTO = {
           name: data.name,
           address: data.address,
@@ -19,8 +16,7 @@ const apiController = () => {
         };
         const task1 = await orderService.addAndSendmail(oDTO);
         if (!task1) {
-          return new Error("Order is faileid");
-          
+          return res.status(500).json({ success: false, mess: "Order failed" });
         }
         res.json({ success: true });
       } catch (error) {

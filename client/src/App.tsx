@@ -139,8 +139,23 @@ type TimeLeft = {
 };
 
 const CountdownTimer2: React.FC<CountdownProps> = ({ endTime }) => {
-  const calculateTimeLeft = (): TimeLeft => {
-    const diff = new Date(endTime).getTime() - new Date().getTime();
+  useEffect(() => {
+    const parsedMs = endTime ? new Date(endTime).getTime() : NaN;
+    console.log("[CountdownTimer2] raw endTime:", endTime);
+    console.log("[CountdownTimer2] parsed ms:", parsedMs);
+    console.log("[CountdownTimer2] parsed ISO:", Number.isNaN(parsedMs) ? "Invalid Date" : new Date(parsedMs).toISOString());
+    console.log("[CountdownTimer2] now ISO:", new Date().toISOString());
+  }, [endTime]);
+
+  const calculateTimeLeft = (targetEndTime: string): TimeLeft => {
+    if (!targetEndTime) {
+      return { days: 0, hours: 0, minutes: 0, seconds: 0 };
+    }
+    const targetMs = new Date(targetEndTime).getTime();
+    if (Number.isNaN(targetMs)) {
+      return { days: 0, hours: 0, minutes: 0, seconds: 0 };
+    }
+    const diff = targetMs - new Date().getTime();
 
     return {
       days: Math.max(0, Math.floor(diff / (1000 * 60 * 60 * 24))),
@@ -150,15 +165,16 @@ const CountdownTimer2: React.FC<CountdownProps> = ({ endTime }) => {
     };
   };
 
-  const [timeLeft, setTimeLeft] = useState<TimeLeft>(calculateTimeLeft());
+  const [timeLeft, setTimeLeft] = useState<TimeLeft>(calculateTimeLeft(endTime));
 
   useEffect(() => {
+    setTimeLeft(calculateTimeLeft(endTime));
     const timer = setInterval(() => {
-      setTimeLeft(calculateTimeLeft());
+      setTimeLeft(calculateTimeLeft(endTime));
     }, 1000);
 
     return () => clearInterval(timer);
-  }, []);
+  }, [endTime]);
 
   const Box = ({ value, label }: { value: number; label: string }) => (
     <div className="flex flex-col items-center">
@@ -245,7 +261,7 @@ const PurchaseFrame = ({ id, data }: { id?: string; data: any }) => {
     e.preventDefault();
     try {
       const res = await axios.post(apiFetchLocal + "/order", form);
-      console.log("tra ve gi ", res);
+      // console.log("tra ve gi ", res);
       alert("Đặt đơn thành công");
     } catch (error) {
       alert("Có lỗi xảy ra");
@@ -265,7 +281,7 @@ const PurchaseFrame = ({ id, data }: { id?: string; data: any }) => {
             ƯU ĐÃI KẾT THÚC SAU
           </p>
           {/* <CountdownTimer2 endTime="2026-03-22T10:00:00Z" /> */}
-          <CountdownTimer2 endTime="2026-03-22T10:00:00Z" />
+          <CountdownTimer2 endTime={data?.purchase_frame?.countdown} />
         </div>
       </div>
       {/*  */}
@@ -936,7 +952,7 @@ export default function App() {
     fetch(apiLandingPage)
       .then((res) => res.json())
       .then((data) => {
-        console.log(data.data);
+        // console.log(data.data);
         setPageData(data.data);
       });
   }, []);

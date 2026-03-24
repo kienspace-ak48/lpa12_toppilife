@@ -76,8 +76,17 @@ router.post("/admin/login", loginLimiter, async (req, res) => {
 });
 //logout
 router.post("/admin/logout", (req, res) => {
-  res.clearCookie("token");
-  res.redirect("/");
+  const cookieOptions = {
+    httpOnly: true,
+    secure: isProd,
+    sameSite: isProd ? "none" : "lax",
+    path: "/",
+  };
+  res.clearCookie("token", cookieOptions);
+  res.set("Cache-Control", "no-store, no-cache, must-revalidate, proxy-revalidate");
+  res.set("Pragma", "no-cache");
+  res.set("Expires", "0");
+  res.redirect("/auth/admin/login");
 });
 //
 router.get("/register", async (res, req) => {
