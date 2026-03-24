@@ -22,6 +22,8 @@ const pageConfigController = () => {
             badge: data.hero_badge,
             title: data.hero_title,
             desc: data.hero_desc,
+            media_type: data.hero_media_type || "image",
+            media_url: data.hero_media_url,
             img_url: data.hero_img_url,
             benefits: data.hero_benefits,
           },

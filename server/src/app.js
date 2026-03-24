@@ -9,6 +9,7 @@ const router = require('./routes');
 const path = require('path');
 const dbConnection = require("./config/dbConnection.config");
 const pageConfigModel = require("./model/pageConfig.model");
+const feedbackModel = require("./model/feedback.model");
 const cookieParser = require("cookie-parser");
 
 //connect dB
@@ -41,6 +42,13 @@ app.get("/test", (req, res) => {
 app.get('/api/landing', async(req, res)=>{
   try {
     const pc = await pageConfigModel.findOne({}).select('-__v -_id').lean();
+    const feedbackItems = await feedbackModel
+      .find({ isDeleted: false })
+      .sort({ createdAt: -1 })
+      .select("-__v")
+      .lean();
+    pc.feedback = pc.feedback || {};
+    pc.feedback.items = feedbackItems;
     // console.log(pc);
     res.success(pc)
   } catch (error) {

@@ -9,13 +9,15 @@ const orderAdminController = () => {
       try {
         const status = (req.query.status || "").trim();
         const keyword = (req.query.keyword || "").trim();
+        const startDate = (req.query.startDate || "").trim();
+        const endDate = (req.query.endDate || "").trim();
         const page = parseInt(req.query.page, 10) || 1;
         const limit = parseInt(req.query.limit, 10) || 10;
         const data = await orderService.getAll({ status, keyword, page, limit });
 
         return res.render(VNAME + "orders", {
           orders: data.items,
-          filter: { status, keyword },
+          filter: { status, keyword, startDate, endDate },
           pagination: data.pagination,
           statuses: ["new", "processing", "completed", "cancelled"],
         });
@@ -23,10 +25,33 @@ const orderAdminController = () => {
         console.log(CNAME, error.message);
         return res.render(VNAME + "orders", {
           orders: [],
-          filter: { status: "", keyword: "" },
+          filter: { status: "", keyword: "", startDate: "", endDate: "" },
           pagination: { page: 1, totalPages: 1, total: 0, limit: 10 },
           statuses: ["new", "processing", "completed", "cancelled"],
         });
+      }
+    },
+    ExportExcel: async (req, res) => {
+      try {
+        const startDate = (req.query.startDate || "").trim();
+        const endDate = (req.query.endDate || "").trim();
+        const exported = await orderService.exportOrdersToExcel(startDate, endDate);
+        if (!exported.success || !exported.buffer) {
+          return res.status(500).json({ success: false, mess: "Export failed" });
+        }
+
+        res.setHeader(
+          "Content-Type",
+          "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        );
+        res.setHeader(
+          "Content-Disposition",
+          `attachment; filename="${exported.fileName}"`,
+        );
+        return res.send(exported.buffer);
+      } catch (error) {
+        console.log(CNAME, error.message);
+        return res.status(500).json({ success: false, mess: error.message });
       }
     },
     UpdateStatus: async (req, res) => {

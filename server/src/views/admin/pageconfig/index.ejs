@@ -1,3 +1,4 @@
+<script defer src="/js/imagePicker.module.js"></script>
 <script defer src="/js/pageconfig.js"></script>
 <form id="configForm">
   <div class="space-y-4">
@@ -43,6 +44,21 @@
       class="border w-full px-3 py-2 rounded"
     ><%=pc?.hero?.desc ||''%></textarea>
 
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mt-2">
+      <select name="hero_media_type" class="border w-full px-3 py-2 rounded">
+        <option value="image" <%= (pc?.hero?.media_type || "image") === "image" ? "selected" : "" %>>Image</option>
+        <option value="gif" <%= (pc?.hero?.media_type || "image") === "gif" ? "selected" : "" %>>GIF</option>
+        <option value="video" <%= (pc?.hero?.media_type || "image") === "video" ? "selected" : "" %>>Video</option>
+      </select>
+      <input
+        type="text"
+        name="hero_media_url"
+        value="<%=pc?.hero?.media_url||''%>"
+        class="w-full px-4 py-3 border border-gray-300 rounded-lg hidden"
+        placeholder="hero media path"
+      />
+    </div>
+
     <!-- <input
       name="hero_img_url"
       value="<%#=pc?.hero?.img_url||''%>"
@@ -51,14 +67,20 @@
     /> -->
     <!--  -->
     <!-- image handle action -->
-<div class="image_action">
+<div class="image_action hero_media_action">
   <!-- <label for="">Image banner</label> -->
-  <div class="flex justify-between items-center mt-3">
+  <div class="flex gap-2 items-center mt-3">
     <button
       type="button"
-      class="flex-1 px-4 py-3 chooseImg rounded-lg border border-green-500"
+      class="flex-1 px-4 py-3 chooseHeroImage rounded-lg border border-green-500"
     >
-      Chọn ảnh
+      Chọn ảnh/GIF
+    </button>
+    <button
+      type="button"
+      class="flex-1 px-4 py-3 chooseHeroVideo rounded-lg border border-blue-500"
+    >
+      Chọn video
     </button>
     <input
       type="text"
@@ -68,12 +90,20 @@
       placeholder="img"
     />
   </div>
-  <div class="img_preview border border-gray-300 w-full h-[200px]">
-    <img
-      src="/<%=pc?.hero?.img_url||''%>"
-      alt=""
-      class="w-full object-cover max-h-[200px]"
-    />
+  <div class="img_preview border border-gray-300 w-full h-[200px] flex items-center justify-center overflow-hidden">
+    <%
+      const heroType = pc?.hero?.media_type || "image";
+      const heroMedia = pc?.hero?.media_url || pc?.hero?.img_url || "";
+    %>
+    <% if (heroType === "video" && heroMedia) { %>
+      <video src="/<%=heroMedia%>" class="w-full h-full object-cover" controls muted playsinline></video>
+    <% } else { %>
+      <img
+        src="/<%=heroMedia%>"
+        alt=""
+        class="w-full object-cover max-h-[200px]"
+      />
+    <% } %>
   </div>
 </div>
     <!--  -->
@@ -173,7 +203,44 @@
   </div>
 </div>
     <!--  -->
-    <textarea id="purchase_policy" class="border w-full px-3 py-2 rounded" ><%=pc?.purchase_frame?.policy?.join('\n')%></textarea>
+    <div class="flex justify-between items-center pt-3">
+      <h5 class="font-bold">Policy (Icon + Text)</h5>
+      <button
+        type="button"
+        id="cta_add_purchase_policy"
+        class="px-3 py-2 border border-gray-300 rounded-lg bg-green-500 text-white font-bold"
+      >
+        + Add policy
+      </button>
+    </div>
+    <div id="purchase_policy_wrapper" class="grid grid-cols-1 gap-2 mt-2">
+      <% (pc?.purchase_frame?.policy || []).forEach(function(p){ 
+        const icon = typeof p === "string" ? "Truck" : (p?.icon || "Truck");
+        const text = typeof p === "string" ? p : (p?.text || "");
+      %>
+        <div class="instance border border-gray-300 rounded p-2">
+          <div class="flex justify-end mb-2">
+            <button type="button" class="remove-instance text-red-500 text-sm">Remove</button>
+          </div>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
+            <input
+              type="text"
+              _icon
+              value="<%=icon%>"
+              class="px-3 py-2 border border-gray-300 rounded-lg"
+              placeholder="Icon name (vd: Truck, ShieldCheck, RotateCcw)"
+            />
+            <input
+              type="text"
+              _text
+              value="<%=text%>"
+              class="px-3 py-2 border border-gray-300 rounded-lg"
+              placeholder="Policy text"
+            />
+          </div>
+        </div>
+      <% }) %>
+    </div>
   </div>
 </section>
 <!-- =============== Warranty ============== -->   
@@ -693,6 +760,29 @@
     </div>
   </div>
 </template>
+<!-- ------------- PURCHASE POLICY ----------- -->
+<template id="purchase_policy_template">
+  <div class="instance border border-gray-300 rounded p-2">
+    <div class="flex justify-end mb-2">
+      <button type="button" class="remove-instance text-red-500 text-sm">Remove</button>
+    </div>
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-2">
+      <input
+        type="text"
+        _icon
+        value="Truck"
+        class="px-3 py-2 border border-gray-300 rounded-lg"
+        placeholder="Icon name (vd: Truck, ShieldCheck, RotateCcw)"
+      />
+      <input
+        type="text"
+        _text
+        class="px-3 py-2 border border-gray-300 rounded-lg"
+        placeholder="Policy text"
+      />
+    </div>
+  </div>
+</template>
 <!-- ------------- BODY AREA ----------- -->
 <template id="body_area_template">
   <div class="instance relative">
@@ -968,6 +1058,22 @@
       instance.remove();
     }
   })
+  // ================= Purchase Policy ==============//
+  const purchasePolicyWrapper = document.querySelector('#purchase_policy_wrapper');
+  const purchasePolicyTemplate = document.querySelector('#purchase_policy_template');
+  const ctaAddPurchasePolicy = document.querySelector('#cta_add_purchase_policy');
+  if (purchasePolicyWrapper && purchasePolicyTemplate && ctaAddPurchasePolicy) {
+    ctaAddPurchasePolicy.addEventListener('click', ()=>{
+      const clone = purchasePolicyTemplate.content.cloneNode(true);
+      purchasePolicyWrapper.appendChild(clone);
+    });
+    purchasePolicyWrapper.addEventListener('click', (ev)=>{
+      if(ev.target.classList.contains("remove-instance")){
+        const instance = ev.target.closest('.instance');
+        instance.remove();
+      }
+    });
+  }
 
   
 

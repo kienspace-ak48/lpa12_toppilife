@@ -5,6 +5,8 @@ const galleryController = require("../controller/gallery.controller")();
 const homeController = require('../controller/home.controller')();
 const pageConfigController = require('../controller/pageConfig.controller')();
 const orderAdminController = require("../controller/order.admin.controller")();
+const feedbackAdminController = require("../controller/feedback.admin.controller")();
+const mediaLibraryRoute = require("./mediaLibrary.route");
 const uploadImage = require("../config/uploadImage.config");
 const visitModel = require('../model/visit.model')
 
@@ -34,10 +36,16 @@ router.post('/gallery/image-upload-ajax',uploadImage.single("image"),
   next();
 },galleryController.UploadImage);
 router.delete('/gallery/image-delete-ajax', galleryController.DeleteImageAjax);
+router.use("/media", mediaLibraryRoute);
 
 router.get("/orders", orderAdminController.Index);
+router.get("/orders/export", orderAdminController.ExportExcel);
 router.patch("/orders/:id/status", orderAdminController.UpdateStatus);
 router.delete("/orders/:id", orderAdminController.SoftDelete);
+router.get("/feedbacks", feedbackAdminController.Index);
+router.post("/feedbacks", feedbackAdminController.Create);
+router.put("/feedbacks/:id", feedbackAdminController.Update);
+router.delete("/feedbacks/:id", feedbackAdminController.Delete);
 
 router.get("/", async (req, res) => {
   const total = await visitModel.countDocuments();

@@ -3,16 +3,12 @@ import {
   Phone,
   CheckCircle2,
   Star,
-  ShieldCheck,
-  Truck,
-  RotateCcw,
   ChevronRight,
   Zap,
   Users,
   PlayCircle,
   Package,
   Activity,
-  Heart,
   Dumbbell,
   Info,
   CircleCheckBig,
@@ -23,6 +19,7 @@ import { formatPhone433, formatPhone442 } from "./utils/formatPhone.js";
 import axios from "axios";
 import VideoCard from "./utils/VideoCard.js";
 import { Helmet } from "react-helmet-async";
+import { getLucideIconByName } from "./utils/lucideIcon";
 
 // http://localhost:8082/
 const ASSET_URL = "/"; //deploy thay => / "http://localhost:8082/
@@ -362,15 +359,20 @@ const PurchaseFrame = ({ id, data }: { id?: string; data: any }) => {
         </form>
 
         <div className="mt-6 pt-6 border-t border-gray-100 space-y-2">
-          {data?.purchase_frame?.policy?.map((p, i) => (
-            <div
-              key={i}
-              className="flex items-center gap-2 text-emerald-700 font-bold text-[11px]"
-            >
-              <Truck size={14} />
-              <span>{p}</span>
-            </div>
-          ))}
+          {data?.purchase_frame?.policy?.map((p, i) => {
+            const iconName = typeof p === "string" ? "Truck" : p?.icon;
+            const text = typeof p === "string" ? p : p?.text;
+            const Icon = getLucideIconByName(iconName);
+            return (
+              <div
+                key={i}
+                className="flex items-center gap-2 text-emerald-700 font-bold text-[11px]"
+              >
+                <Icon size={14} />
+                <span>{text}</span>
+              </div>
+            );
+          })}
           {/* <div className="flex items-center gap-2 text-emerald-700 font-bold text-[11px]">
             <Truck size={14} />
             <span>Miễn phí vận chuyển toàn quốc</span>
@@ -390,6 +392,10 @@ const PurchaseFrame = ({ id, data }: { id?: string; data: any }) => {
 };
 
 const Hero: React.FC<any> = ({ data }) => {
+  const mediaType = data?.hero?.media_type || "image";
+  const mediaUrl = data?.hero?.media_url || data?.hero?.img_url || "";
+  const isVideo = mediaType === "video";
+
   return (
     <section className="pt-20 pb-10 px-4 bg-gradient-to-b from-emerald-50 to-white">
       <div className="max-w-md mx-auto text-center">
@@ -409,12 +415,24 @@ const Hero: React.FC<any> = ({ data }) => {
         <p className="text-gray-600 text-sm mb-6">{data?.hero?.desc ?? ""}</p>
 
         <div className="relative mb-8">
-          <img
-            src={ASSET_URL + data?.hero?.img_url}
-            alt="LPA12 Usage"
-            className="w-full rounded-3xl shadow-xl border-4 border-white"
-            referrerPolicy="no-referrer"
-          />
+          {isVideo ? (
+            <video
+              src={ASSET_URL + mediaUrl}
+              className="w-full rounded-3xl shadow-xl border-4 border-white max-h-[460px] object-cover"
+              muted
+              autoPlay
+              loop
+              playsInline
+              controls={false}
+            />
+          ) : (
+            <img
+              src={ASSET_URL + mediaUrl}
+              alt="LPA12 Usage"
+              className="w-full rounded-3xl shadow-xl border-4 border-white"
+              referrerPolicy="no-referrer"
+            />
+          )}
           <div className="absolute -bottom-4 left-1/2 -translate-x-1/2 bg-white px-4 py-2 rounded-full shadow-lg border border-emerald-100 flex items-center gap-2">
             <div className="w-2 h-2 bg-emerald-500 rounded-full animate-ping"></div>
             <span className="text-xs font-bold text-emerald-700 uppercase tracking-wider">
@@ -909,6 +927,127 @@ const Policies = ({ data }) => {
   );
 };
 
+const FeedbackMediaCard = ({
+  item,
+  expanded,
+  onToggle,
+}: {
+  item: any;
+  expanded: boolean;
+  onToggle: () => void;
+}) => {
+  const medias = [
+    ...(item?.images || []).map((src) => ({ type: "image", src })),
+    ...(item?.video_url ? [{ type: "video", src: item.video_url }] : []),
+  ];
+  const [activeIndex, setActiveIndex] = useState(0);
+  const active = medias[activeIndex] || null;
+  const toMediaUrl = (src: string) => {
+    if (!src) return "";
+    if (src.startsWith("http://") || src.startsWith("https://")) return src;
+    return `${ASSET_URL}${src}`;
+  };
+  const isYoutubeUrl = (src: string) =>
+    src.includes("youtube.com/") || src.includes("youtu.be/");
+  const toYoutubeEmbed10s = (src: string) => {
+    const normalized = src.replace("youtu.be/", "youtube.com/watch?v=");
+    const id = normalized.split("v=")[1]?.split("&")[0] || "";
+    if (!id) return "";
+    return `https://www.youtube.com/embed/${id}?start=0&end=10&autoplay=1&mute=1&controls=0&fs=0&rel=0&modestbranding=1`;
+  };
+  const keepPreview10s = (e: React.SyntheticEvent<HTMLVideoElement>) => {
+    const video = e.currentTarget;
+    if (video.currentTime > 10) {
+      video.currentTime = 0;
+      video.play().catch(() => {});
+    }
+  };
+
+  return (
+    <div className="p-4 bg-gray-50 rounded-2xl border border-gray-100">
+      <div className="flex items-start gap-3 mb-2">
+        <img
+          src={item?.avatar_url ? `${ASSET_URL}${item.avatar_url}` : "/image/no_avatar.png"}
+          alt="avatar"
+          className="w-9 h-9 rounded-full border object-cover"
+          referrerPolicy="no-referrer"
+        />
+        <div className="flex-1">
+          <div className="flex items-center gap-2">
+            <span className="font-bold text-sm">{item?.customer_name || "Khách hàng"}</span>
+            <div className="flex text-red-500">
+              {Array.from({ length: Number(item?.star || 5) }).map((_, z) => (
+                <Star key={z} size={12} fill="currentColor" />
+              ))}
+            </div>
+          </div>
+          <p className="text-[11px] text-gray-500">
+            {item?.createdAt ? new Date(item.createdAt).toLocaleString() : ""}
+          </p>
+        </div>
+        <button
+          type="button"
+          onClick={onToggle}
+          className="text-[11px] px-2 py-1 border rounded-md text-gray-600 hover:bg-gray-100"
+        >
+          {expanded ? "Thu gọn" : "Xem media"}
+        </button>
+      </div>
+
+      <p className="text-xs text-gray-700 leading-relaxed whitespace-pre-line line-clamp-2">
+        {item?.comment}
+      </p>
+
+      {expanded && medias.length > 0 && (
+        <div className="mt-3">
+          <div className="flex gap-2 mb-2">
+            {medias.map((m, idx) => (
+              <button
+                key={idx}
+                type="button"
+                onClick={() => setActiveIndex(idx)}
+                className={`border ${idx === activeIndex ? "border-red-500" : "border-gray-200"} rounded-md overflow-hidden`}
+              >
+                <div className="w-16 h-16 bg-white flex items-center justify-center">
+                  {m.type === "image" ? (
+                    <img src={toMediaUrl(m.src)} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+                  ) : (
+                    <PlayCircle size={24} className="text-gray-600" />
+                  )}
+                </div>
+              </button>
+            ))}
+          </div>
+          <div className="rounded-xl overflow-hidden border bg-white">
+            {active?.type === "image" ? (
+              <img src={toMediaUrl(active.src)} className="w-full max-h-[420px] object-contain" referrerPolicy="no-referrer" />
+            ) : isYoutubeUrl(active?.src || "") ? (
+              <iframe
+                src={toYoutubeEmbed10s(active?.src || "")}
+                className="w-full max-h-[320px] aspect-video"
+                title="feedback-video-preview"
+              />
+            ) : (
+              <video
+                src={toMediaUrl(active?.src || "")}
+                className="w-full max-h-[320px] object-cover"
+                muted
+                playsInline
+                autoPlay
+                loop
+                controls={false}
+                disablePictureInPicture
+                controlsList="nofullscreen nodownload noremoteplayback noplaybackrate"
+                onTimeUpdate={keepPreview10s}
+              />
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
 const Footer = ({ data }) => {
   return (
     <footer className="bg-gray-900 text-white py-12 px-4 pb-32">
@@ -946,7 +1085,14 @@ const Footer = ({ data }) => {
 
 export default function App() {
   const [pageData, setPageData] = useState(null);
+  const [feedbackItems, setFeedbackItems] = useState<any[]>([]);
+  const [openFeedbackId, setOpenFeedbackId] = useState<string>("");
   const apiLandingPage = apiFetchLocal + "/landing";
+  const apiFeedbackPage = apiFetchLocal + "/feedback";
+  const totalReviews = feedbackItems.length;
+  const avgRating = totalReviews
+    ? feedbackItems.reduce((sum, i) => sum + Number(i?.star || 0), 0) / totalReviews
+    : 0;
 
   useEffect(() => {
     fetch(apiLandingPage)
@@ -955,6 +1101,15 @@ export default function App() {
         // console.log(data.data);
         setPageData(data.data);
       });
+  }, []);
+  useEffect(() => {
+    fetch(apiFeedbackPage)
+      .then((res) => res.json())
+      .then((data) => {
+        if (!data?.success) return;
+        setFeedbackItems(Array.isArray(data.data) ? data.data : []);
+      })
+      .catch(() => setFeedbackItems([]));
   }, []);
   if (!pageData) {
     return (
@@ -1024,37 +1179,25 @@ export default function App() {
                   <Star
                     key={i}
                     size={20}
-                    fill="#fbbf24"
-                    className="text-yellow-400"
+                    fill={i <= Math.round(avgRating) ? "#fbbf24" : "none"}
+                    className={i <= Math.round(avgRating) ? "text-yellow-400" : "text-gray-300"}
                   />
                 ))}
                 <span className="ml-2 font-bold text-gray-900">
-                  4.9/5 (4 đánh giá)
+                  {avgRating.toFixed(1)}/5 ({totalReviews} đánh giá)
                 </span>
               </div>
               <div className="space-y-4">
-                {// [1, 2, 3, 4]
-                pageData?.feedback?.list.map((f, i) => (
-                  <div
-                    key={i}
-                    className="p-4 bg-gray-50 rounded-2xl border border-gray-100"
-                  >
-                    <div className="flex justify-between items-center mb-2">
-                      <span className="font-bold text-sm">{f.title}</span>
-                      <div className="flex text-yellow-400">
-                        {Array?.from({ length: f.star })?.map((_, z) => (
-                          <Star key={z} size={10} fill="currentColor" />
-                        ))
-                        // [1, 2, 3, 4, 5].map((j) => (
-                        //   <Star key={j} size={10} fill="currentColor" />
-                        // ))
-                        }
-                      </div>
-                    </div>
-                    <p className="text-xs text-gray-600 leading-relaxed italic">
-                      {f.desc}
-                    </p>
-                  </div>
+                {(feedbackItems || []).map((f, i) => (
+                  <FeedbackMediaCard
+                    item={f}
+                    key={f?._id || i}
+                    expanded={openFeedbackId === String(f?._id || i)}
+                    onToggle={() => {
+                      const nextId = String(f?._id || i);
+                      setOpenFeedbackId((prev) => (prev === nextId ? "" : nextId));
+                    }}
+                  />
                 ))}
               </div>
             </div>

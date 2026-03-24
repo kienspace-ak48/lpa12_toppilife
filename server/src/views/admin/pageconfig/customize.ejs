@@ -191,119 +191,47 @@
     </div>
   </div>
 </section>
-<!-- =================MODAL===================== -->
-<div
-  id="gallery_modal"
-  class="fixed inset-0 bg-black/50 items-center hidden justify-center"
->
-  <div class="bg-white min-w-75 max-h-[80vh] rounded p-4 overflow-y-auto">
-    <div class="header flex justify-between mb-4">
-      <h2>Chon anh</h2>
-      <button onclick="closeChooseImgModal()">X</button>
-    </div>
-    <!--  -->
-    <div id="imgList" class="grid grid-cols-4 gap-4"></div>
-  </div>
-</div>
+<script src="/js/imagePicker.module.js"></script>
 <!-- =============SCRIPT=============== -->
 <script>
-  var ctaChooseImg = document.querySelectorAll(".chooseImg");
-  const chooseImgModal = document.querySelector("#gallery_modal");
-  let imgInputIsFocusing = null;
-  // combo choose image
-  function openChooseImgModal() {
-    chooseImgModal.classList.remove("hidden");
-    chooseImgModal.classList.add("flex");
-  }
-  function closeChooseImgModal() {
-    chooseImgModal.classList.remove("flex");
-    chooseImgModal.classList.add("hidden");
-  }
-  ctaChooseImg.forEach((el) => {
-    el.addEventListener("click", (ev) => {
-      console.log(el);
-      loadImage();
-      let input = el.closest(".image_action");
-      imgInputIsFocusing = input;
-      console.log("input ", input);
-      openChooseImgModal();
-    });
-  });
-  function selectImage(src) {
-    imgInputIsFocusing.querySelector(".img_input").value = src;
-    imgInputIsFocusing.querySelector(".img_preview img").src = "/" + src;
-    closeChooseImgModal();
-  }
-  //
-  function loadImage() {
-    imgList.innerHTML = "Loading...";
-    $.ajax({
-      url: "/admin/gallery/image-getall",
-      method: "GET",
-      success: (res) => {
-        if (res.success) {
-          imgList.innerHTML = "";
-          res.data.forEach((item) => {
-            const img = document.createElement("img");
-            img.src = "/" + item.path;
-            img.className = `
-            w-full h-32
-            object-cover
-            cursor-pointer rounded border
-            hover:ring-4 hover:ring-blue-500
-            transition
-          `;
-
-            img.onclick = () => selectImage(item.path);
-
-            imgList.appendChild(img);
-          });
-        }
+  if (window.ImagePicker) {
+    window.ImagePicker.initImagePicker({
+      triggerSelector: ".chooseImg",
+      onSelect: (src, triggerEl) => {
+        const root = triggerEl?.closest(".image_action");
+        if (!root) return;
+        const input = root.querySelector(".img_input");
+        const preview = root.querySelector(".img_preview img");
+        if (input) input.value = src;
+        if (preview) preview.src = "/" + src;
       },
-      error: (xhr, status, err) =>
-        console.log(xhr.responseJSON?.mess || "Server error"),
     });
   }
-  // end combo
-  //
-  document
-    .getElementById("btn_cta_save_config")
-    .addEventListener("click", async () => {
-      const data = {
-        pageinfo_email: document.querySelector("[name='pageinfo_email']").value,
-        pageinfo_phone: document.querySelector("[name='pageinfo_phone']").value,
-        pageinfo_zalo: document.querySelector("[name='pageinfo_zalo']").value,
-        pageinfo_address: document.querySelector("[name='pageinfo_address']")
-          .value,
-        pageinfo_facebook: document.querySelector("[name='pageinfo_facebook']")
-          .value,
-        pageinfo_tiktok: document.querySelector("[name='pageinfo_tiktok']")
-          .value,
-        pageinfo_youtube: document.querySelector("[name='pageinfo_youtube']")
-          .value,
-        worktime: document.querySelector("[name='worktime']").value,
-        webname: document.getElementById("webname").value,
-        canonical: document.getElementById("canonical").value,
-        desc: document.getElementById("desc").value,
-        keywords: document.getElementById("keywords").value,
-        // gg_a: document.getElementById("gg_a").value,
-        // gg_wt: document.getElementById("gg_wt").value,
-        img: document.querySelector("[name='website_img']").value,
-      };
 
-      const res = await fetch("/admin/page-config/customize-section", {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(data),
-      });
+  document.getElementById("btn_cta_save_config").addEventListener("click", async () => {
+    const data = {
+      pageinfo_email: document.querySelector("[name='pageinfo_email']").value,
+      pageinfo_phone: document.querySelector("[name='pageinfo_phone']").value,
+      pageinfo_zalo: document.querySelector("[name='pageinfo_zalo']").value,
+      pageinfo_address: document.querySelector("[name='pageinfo_address']").value,
+      pageinfo_facebook: document.querySelector("[name='pageinfo_facebook']").value,
+      pageinfo_tiktok: document.querySelector("[name='pageinfo_tiktok']").value,
+      pageinfo_youtube: document.querySelector("[name='pageinfo_youtube']").value,
+      worktime: document.querySelector("[name='worktime']").value,
+      webname: document.getElementById("webname").value,
+      canonical: document.getElementById("canonical").value,
+      desc: document.getElementById("desc").value,
+      keywords: document.getElementById("keywords").value,
+      img: document.querySelector("[name='website_img']").value,
+    };
 
-      const result = await res.json();
-      if (result.success) {
-        alert("update successfully");
-      } else {
-        alert("update failed");
-      }
+    const res = await fetch("/admin/page-config/customize-section", {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(data),
     });
+    const result = await res.json();
+    if (result.success) alert("update successfully");
+    else alert("update failed");
+  });
 </script>

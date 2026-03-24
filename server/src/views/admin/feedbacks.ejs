@@ -1,0 +1,263 @@
+<div class="mb-4 flex items-center justify-between">
+  <h1 class="text-xl font-bold">Feedback management</h1>
+  <button id="btnOpenCreate" class="px-4 py-2 bg-blue-600 text-white rounded-lg font-semibold shadow">
+    + Add feedback
+  </button>
+</div>
+
+<div class="overflow-x-auto border rounded-lg">
+  <table class="w-full text-sm">
+    <thead class="bg-gray-50">
+      <tr class="border-b">
+        <th class="p-3 text-left">Avatar</th>
+        <th class="p-3 text-left">Customer</th>
+        <th class="p-3 text-left">Star</th>
+        <th class="p-3 text-left">Comment</th>
+        <th class="p-3 text-left">Media</th>
+        <th class="p-3 text-left">Created</th>
+        <th class="p-3 text-left">Actions</th>
+      </tr>
+    </thead>
+    <tbody id="feedbackTableBody">
+      <% if (!feedbacks || feedbacks.length === 0) { %>
+        <tr><td colspan="7" class="p-4 text-center text-gray-500">No feedback yet</td></tr>
+      <% } %>
+      <% (feedbacks || []).forEach(function(fb){ %>
+        <tr class="border-b hover:bg-gray-50" data-id="<%= fb._id %>">
+          <td class="p-3">
+            <% if (fb.avatar_url) { %>
+              <img src="/<%= fb.avatar_url %>" class="w-10 h-10 rounded-full object-cover border" />
+            <% } else { %>
+              <div class="w-10 h-10 rounded-full bg-gray-100 border"></div>
+            <% } %>
+          </td>
+          <td class="p-3"><%= fb.customer_name %></td>
+          <td class="p-3"><%= fb.star %> / 5</td>
+          <td class="p-3 max-w-sm"><%= fb.comment %></td>
+          <td class="p-3">
+            <div><%= (fb.images || []).length %> image(s)</div>
+            <div><%= fb.video_url ? "1 video" : "0 video" %></div>
+          </td>
+          <td class="p-3"><%= new Date(fb.createdAt).toLocaleString() %></td>
+          <td class="p-3 space-x-2">
+            <button type="button" class="px-3 py-1 text-xs border rounded editBtn">Edit</button>
+            <button type="button" class="px-3 py-1 text-xs border border-red-500 text-red-600 rounded deleteBtn">Delete</button>
+          </td>
+          <td class="hidden fb-json"><%- JSON.stringify(fb) %></td>
+        </tr>
+      <% }) %>
+    </tbody>
+  </table>
+</div>
+
+<div class="mt-4 flex items-center justify-between text-sm">
+  <button id="btnOpenCreateBottom" class="px-3 py-1 border border-blue-500 text-blue-600 rounded font-semibold">
+    + Add feedback
+  </button>
+  <div class="space-x-2">
+    <% const prevPage = Math.max(1, pagination.page - 1); %>
+    <% const nextPage = Math.min(pagination.totalPages, pagination.page + 1); %>
+    <a
+      class="px-3 py-1 border rounded <%= pagination.page <= 1 ? 'pointer-events-none opacity-50' : '' %>"
+      href="/admin/feedbacks?page=<%= prevPage %>&limit=<%= pagination.limit %>"
+    >Prev</a>
+    <span>Page <%= pagination.page %>/<%= pagination.totalPages %> - Total <%= pagination.total %></span>
+    <a
+      class="px-3 py-1 border rounded <%= pagination.page >= pagination.totalPages ? 'pointer-events-none opacity-50' : '' %>"
+      href="/admin/feedbacks?page=<%= nextPage %>&limit=<%= pagination.limit %>"
+    >Next</a>
+  </div>
+</div>
+
+<div id="fbModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50 p-3">
+  <div class="bg-white rounded-xl shadow-lg w-[720px] max-w-[95vw] max-h-[92vh] overflow-y-auto p-6">
+    <h2 id="fbModalTitle" class="text-lg font-bold mb-4">Create feedback</h2>
+    <form id="fbForm" class="grid grid-cols-1 md:grid-cols-2 gap-3 min-w-0">
+      <input type="hidden" name="id" />
+      <input name="customer_name" placeholder="Customer name" class="px-3 py-2 border rounded" required />
+      <select name="star" class="px-3 py-2 border rounded">
+        <option value="5">5 star</option>
+        <option value="4">4 star</option>
+        <option value="3">3 star</option>
+        <option value="2">2 star</option>
+        <option value="1">1 star</option>
+      </select>
+      <textarea name="comment" placeholder="Comment" class="md:col-span-2 px-3 py-2 border rounded" rows="4" required></textarea>
+
+      <div class="md:col-span-2 border rounded p-3">
+        <p class="font-semibold text-sm mb-2">Avatar</p>
+        <div class="image_action space-y-2">
+          <button type="button" class="chooseImage px-3 py-2 border rounded text-sm">Chọn avatar</button>
+          <input type="hidden" name="avatar_url" class="img_input" />
+          <div class="img_preview w-20 h-20 border rounded-full overflow-hidden bg-gray-50">
+            <img src="" class="w-full h-full object-cover" />
+          </div>
+        </div>
+      </div>
+
+      <div class="md:col-span-2 border rounded p-3">
+        <p class="font-semibold text-sm mb-2">Ảnh feedback (tối đa 2)</p>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+          <div class="image_action space-y-2">
+            <button type="button" class="chooseImage px-3 py-2 border rounded text-sm">Chọn ảnh 1</button>
+            <input type="hidden" name="image_1" class="img_input" />
+            <div class="img_preview h-24 border rounded overflow-hidden bg-gray-50">
+              <img src="" class="w-full h-full object-cover" />
+            </div>
+          </div>
+          <div class="image_action space-y-2">
+            <button type="button" class="chooseImage px-3 py-2 border rounded text-sm">Chọn ảnh 2</button>
+            <input type="hidden" name="image_2" class="img_input" />
+            <div class="img_preview h-24 border rounded overflow-hidden bg-gray-50">
+              <img src="" class="w-full h-full object-cover" />
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="md:col-span-2 border rounded p-3">
+        <p class="font-semibold text-sm mb-2">Video feedback (preview 10s)</p>
+        <div class="video_action space-y-2">
+          <button type="button" class="chooseVideo px-3 py-2 border rounded text-sm">Chọn video</button>
+          <input type="hidden" name="video_url" class="video_input" />
+          <div class="video_preview border rounded overflow-hidden bg-gray-50">
+            <video src="" class="w-full h-40 object-cover" muted playsinline preload="metadata"></video>
+          </div>
+        </div>
+      </div>
+      <div class="md:col-span-2 flex justify-end gap-2">
+        <button type="button" id="btnCloseModal" class="px-4 py-2 border rounded">Cancel</button>
+        <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded">Save</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script src="/js/imagePicker.module.js"></script>
+<script>
+  const modal = document.getElementById("fbModal");
+  const form = document.getElementById("fbForm");
+  const modalTitle = document.getElementById("fbModalTitle");
+
+  if (window.ImagePicker) {
+    window.ImagePicker.initImagePicker({
+      triggerSelector: ".chooseImage",
+      onSelect: (src, triggerEl) => {
+        const root = triggerEl?.closest(".image_action");
+        if (!root) return;
+        const input = root.querySelector(".img_input");
+        const preview = root.querySelector(".img_preview img");
+        if (input) input.value = src;
+        if (preview) preview.src = "/" + src;
+      },
+    });
+
+    window.ImagePicker.initImagePicker({
+      triggerSelector: ".chooseVideo",
+      mediaType: "video",
+      onSelect: (src, triggerEl) => {
+        const root = triggerEl?.closest(".video_action");
+        if (!root) return;
+        const input = root.querySelector(".video_input");
+        const preview = root.querySelector(".video_preview video");
+        if (input) input.value = src;
+        if (preview) preview.src = "/" + src;
+      },
+    });
+  }
+
+  function openModal() {
+    modal.classList.remove("hidden");
+    modal.classList.add("flex");
+  }
+  function closeModal() {
+    modal.classList.add("hidden");
+    modal.classList.remove("flex");
+  }
+  function resetForm() {
+    form.reset();
+    form.querySelector('[name="id"]').value = "";
+    form.querySelectorAll(".img_preview img").forEach((img) => {
+      img.src = "";
+    });
+    const videoPreview = form.querySelector(".video_preview video");
+    if (videoPreview) videoPreview.src = "";
+  }
+
+  document.getElementById("btnOpenCreate").addEventListener("click", () => {
+    modalTitle.textContent = "Create feedback";
+    resetForm();
+    openModal();
+  });
+  document.getElementById("btnOpenCreateBottom").addEventListener("click", () => {
+    modalTitle.textContent = "Create feedback";
+    resetForm();
+    openModal();
+  });
+  document.getElementById("btnCloseModal").addEventListener("click", closeModal);
+  modal.addEventListener("click", (e) => { if (e.target === modal) closeModal(); });
+
+  document.querySelectorAll(".editBtn").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const tr = btn.closest("tr");
+      const raw = tr.querySelector(".fb-json").textContent;
+      const fb = JSON.parse(raw);
+      modalTitle.textContent = "Update feedback";
+      form.querySelector('[name="id"]').value = fb._id || "";
+      form.querySelector('[name="customer_name"]').value = fb.customer_name || "";
+      form.querySelector('[name="star"]').value = String(fb.star || 5);
+      form.querySelector('[name="comment"]').value = fb.comment || "";
+      form.querySelector('[name="avatar_url"]').value = fb.avatar_url || "";
+      form.querySelector('[name="image_1"]').value = (fb.images || [])[0] || "";
+      form.querySelector('[name="image_2"]').value = (fb.images || [])[1] || "";
+      form.querySelector('[name="video_url"]').value = fb.video_url || "";
+      const avatarPreview = form.querySelector('[name="avatar_url"]')?.closest(".image_action")?.querySelector(".img_preview img");
+      if (avatarPreview) avatarPreview.src = fb.avatar_url ? `/${fb.avatar_url}` : "";
+      const image1Preview = form.querySelector('[name="image_1"]')?.closest(".image_action")?.querySelector(".img_preview img");
+      if (image1Preview) image1Preview.src = (fb.images || [])[0] ? `/${(fb.images || [])[0]}` : "";
+      const image2Preview = form.querySelector('[name="image_2"]')?.closest(".image_action")?.querySelector(".img_preview img");
+      if (image2Preview) image2Preview.src = (fb.images || [])[1] ? `/${(fb.images || [])[1]}` : "";
+      const videoPreview = form.querySelector('[name="video_url"]')?.closest(".video_action")?.querySelector(".video_preview video");
+      if (videoPreview) videoPreview.src = fb.video_url ? `/${fb.video_url}` : "";
+      openModal();
+    });
+  });
+
+  document.querySelectorAll(".deleteBtn").forEach((btn) => {
+    btn.addEventListener("click", async () => {
+      const tr = btn.closest("tr");
+      const id = tr.dataset.id;
+      if (!confirm("Delete this feedback?")) return;
+      const res = await fetch(`/admin/feedbacks/${id}`, { method: "DELETE" });
+      const data = await res.json();
+      if (!data.success) return alert("Delete failed");
+      tr.remove();
+    });
+  });
+
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const id = form.querySelector('[name="id"]').value;
+    const payload = {
+      customer_name: form.querySelector('[name="customer_name"]').value,
+      star: Number(form.querySelector('[name="star"]').value || 5),
+      comment: form.querySelector('[name="comment"]').value,
+      avatar_url: form.querySelector('[name="avatar_url"]').value,
+      images: [
+        form.querySelector('[name="image_1"]').value.trim(),
+        form.querySelector('[name="image_2"]').value.trim(),
+      ].filter(Boolean).slice(0, 2),
+      video_url: form.querySelector('[name="video_url"]').value,
+    };
+    const method = id ? "PUT" : "POST";
+    const url = id ? `/admin/feedbacks/${id}` : "/admin/feedbacks";
+    const res = await fetch(url, {
+      method,
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+    const data = await res.json();
+    if (!data.success) return alert("Save failed");
+    location.reload();
+  });
+</script>

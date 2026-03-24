@@ -19,6 +19,27 @@
   </button>
 </form>
 
+<form method="GET" action="/admin/orders/export" class="grid grid-cols-1 md:grid-cols-4 gap-3 mb-5">
+  <input
+    type="date"
+    name="startDate"
+    value="<%= filter.startDate || '' %>"
+    class="px-4 py-2 border border-gray-300 rounded-lg"
+  />
+  <input
+    type="date"
+    name="endDate"
+    value="<%= filter.endDate || '' %>"
+    class="px-4 py-2 border border-gray-300 rounded-lg"
+  />
+  <button
+    type="submit"
+    class="px-4 py-2 border border-emerald-500 text-emerald-600 rounded-lg font-semibold"
+  >
+    Export Excel
+  </button>
+</form>
+
 <div class="overflow-x-auto border rounded-lg">
   <table class="w-full text-sm">
     <thead class="bg-gray-50">

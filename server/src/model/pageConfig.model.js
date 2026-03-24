@@ -6,6 +6,8 @@ const pageConfigSchema = new mongoose.Schema({
     badge: String,
     title: String,
     desc: String,
+    media_type: { type: String, enum: ["image", "gif", "video"], default: "image" },
+    media_url: String,
     img_url: String,
     benefits: [],
     _id: false,

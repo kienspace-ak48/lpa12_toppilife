@@ -1,0 +1,312 @@
+<h1 class="text-xl font-bold mb-4">Media Library (2 levels)</h1>
+
+<div class="grid grid-cols-12 gap-4">
+  <aside class="col-span-3 border rounded-lg p-3 bg-white">
+    <div class="flex items-center justify-between mb-2">
+      <h2 class="font-semibold">Folders</h2>
+      <button id="btnAddRoot" class="px-2 py-1 text-xs border rounded">+ Root</button>
+    </div>
+    <div id="folderTree" class="space-y-2 text-sm"></div>
+  </aside>
+
+  <section class="col-span-9 border rounded-lg p-3 bg-white">
+    <h3 class="font-semibold mb-2">Image management</h3>
+    <div class="flex flex-wrap gap-2 items-center mb-3">
+      <input id="uploadInput" type="file" class="border rounded px-2 py-1" />
+      <button id="btnUpload" class="px-3 py-1 border border-blue-500 text-blue-600 rounded">Upload</button>
+      <span id="activeFolderLabel" class="text-xs text-gray-500">Subfolder: none</span>
+    </div>
+    <div id="imageGrid" class="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-3"></div>
+
+    <hr class="my-5" />
+    <h3 class="font-semibold mb-2">Video management</h3>
+    <div class="flex flex-wrap gap-2 items-center mb-3">
+      <input id="uploadVideoInput" type="file" accept="video/*" class="border rounded px-2 py-1" />
+      <button id="btnUploadVideo" class="px-3 py-1 border border-purple-500 text-purple-600 rounded">Upload video</button>
+      <span class="text-xs text-gray-500">Preview only 10s on client</span>
+    </div>
+    <div id="videoGrid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3"></div>
+  </section>
+</div>
+
+<div id="folderModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50">
+  <div class="bg-white rounded-lg w-[420px] max-w-[95vw] p-4">
+    <h3 id="folderModalTitle" class="font-semibold mb-2">Create folder</h3>
+    <input id="folderNameInput" class="w-full border rounded px-3 py-2 mb-2" placeholder="Folder name..." />
+    <div id="folderParentWrap" class="mb-2 hidden">
+      <label class="text-sm">Root parent</label>
+      <select id="folderParentSelect" class="w-full border rounded px-3 py-2"></select>
+    </div>
+    <div class="flex justify-end gap-2">
+      <button id="btnCancelFolderModal" class="px-3 py-1 border rounded">Cancel</button>
+      <button id="btnSaveFolderModal" class="px-3 py-1 bg-blue-600 text-white rounded">Save</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  let treeData = [];
+  let activeSubfolderId = "";
+  let folderModalMode = "create-root";
+  let editingFolderId = "";
+
+  const folderTreeEl = document.getElementById("folderTree");
+  const imageGridEl = document.getElementById("imageGrid");
+  const videoGridEl = document.getElementById("videoGrid");
+  const activeFolderLabelEl = document.getElementById("activeFolderLabel");
+  const folderModal = document.getElementById("folderModal");
+  const folderModalTitle = document.getElementById("folderModalTitle");
+  const folderNameInput = document.getElementById("folderNameInput");
+  const folderParentWrap = document.getElementById("folderParentWrap");
+  const folderParentSelect = document.getElementById("folderParentSelect");
+
+  function openFolderModal(mode, id) {
+    folderModalMode = mode;
+    editingFolderId = id || "";
+    folderNameInput.value = "";
+    folderParentWrap.classList.add("hidden");
+    folderModalTitle.textContent = "Create folder";
+    if (mode === "create-sub") {
+      folderModalTitle.textContent = "Create subfolder";
+      folderParentWrap.classList.remove("hidden");
+      folderParentSelect.innerHTML = treeData
+        .map((r) => `<option value="${r._id}">${r.name}</option>`)
+        .join("");
+      if (id) folderParentSelect.value = id;
+    } else if (mode === "edit") {
+      folderModalTitle.textContent = "Rename folder";
+      const folder = findFolderById(id);
+      folderNameInput.value = folder?.name || "";
+    }
+    folderModal.classList.remove("hidden");
+    folderModal.classList.add("flex");
+  }
+  function closeFolderModal() {
+    folderModal.classList.add("hidden");
+    folderModal.classList.remove("flex");
+  }
+  function findFolderById(id) {
+    for (const root of treeData) {
+      if (String(root._id) === String(id)) return root;
+      for (const c of (root.children || [])) {
+        if (String(c._id) === String(id)) return c;
+      }
+    }
+    return null;
+  }
+  function getVideoDuration(file) {
+    return new Promise((resolve, reject) => {
+      const tempUrl = URL.createObjectURL(file);
+      const video = document.createElement("video");
+      video.preload = "metadata";
+      video.onloadedmetadata = () => {
+        const duration = video.duration;
+        URL.revokeObjectURL(tempUrl);
+        resolve(duration);
+      };
+      video.onerror = () => {
+        URL.revokeObjectURL(tempUrl);
+        reject(new Error("Cannot read video metadata"));
+      };
+      video.src = tempUrl;
+    });
+  }
+
+  async function fetchTree() {
+    const res = await fetch("/admin/media/folders/tree");
+    const data = await res.json();
+    treeData = data?.data || [];
+    renderTree();
+  }
+  function renderTree() {
+    folderTreeEl.innerHTML = "";
+    if (!treeData.length) {
+      folderTreeEl.innerHTML = `<p class="text-xs text-gray-500">No root folder yet</p>`;
+      return;
+    }
+    treeData.forEach((root) => {
+      const rootEl = document.createElement("div");
+      rootEl.className = "border rounded p-2";
+      rootEl.innerHTML = `
+        <div class="flex items-center justify-between">
+          <strong>${root.name}</strong>
+          <div class="space-x-1">
+            <button class="text-xs border rounded px-2 py-0.5" data-action="create-sub" data-id="${root._id}">+ Sub</button>
+            <button class="text-xs border rounded px-2 py-0.5" data-action="edit-folder" data-id="${root._id}">Rename</button>
+            <button class="text-xs border border-red-400 text-red-600 rounded px-2 py-0.5" data-action="delete-folder" data-id="${root._id}">Delete</button>
+          </div>
+        </div>
+        <div class="mt-2 space-y-1">
+          ${(root.children || [])
+            .map(
+              (c) => `<div class="flex items-center justify-between p-1 rounded ${activeSubfolderId === String(c._id) ? "bg-blue-50" : "bg-gray-50"}">
+                <button class="text-xs text-left flex-1" data-action="select-sub" data-id="${c._id}" data-name="${c.name}">${c.name}</button>
+                <div class="space-x-1">
+                  <button class="text-xs border rounded px-1" data-action="edit-folder" data-id="${c._id}">Rename</button>
+                  <button class="text-xs border border-red-400 text-red-600 rounded px-1" data-action="delete-folder" data-id="${c._id}">Delete</button>
+                </div>
+              </div>`,
+            )
+            .join("")}
+        </div>
+      `;
+      folderTreeEl.appendChild(rootEl);
+    });
+  }
+
+  async function fetchImages() {
+    const qs = activeSubfolderId ? `?folder_id=${activeSubfolderId}` : "";
+    const res = await fetch(`/admin/media/images${qs}`);
+    const data = await res.json();
+    const items = data?.data || [];
+    imageGridEl.innerHTML = "";
+    if (!items.length) {
+      imageGridEl.innerHTML = `<p class="col-span-full text-gray-500 text-sm">No image</p>`;
+      return;
+    }
+    items.forEach((img) => {
+      const div = document.createElement("div");
+      div.className = "border rounded overflow-hidden";
+      div.innerHTML = `
+        <img src="/${img.path}" class="w-full h-28 object-cover" />
+        <div class="p-2">
+          <button class="w-full text-xs border border-red-400 text-red-600 rounded py-1" data-action="delete-image" data-id="${img._id}">Delete</button>
+        </div>
+      `;
+      imageGridEl.appendChild(div);
+    });
+  }
+  async function fetchVideos() {
+    const qs = activeSubfolderId ? `?folder_id=${activeSubfolderId}` : "";
+    const res = await fetch(`/admin/media/videos${qs}`);
+    const data = await res.json();
+    const items = data?.data || [];
+    videoGridEl.innerHTML = "";
+    if (!items.length) {
+      videoGridEl.innerHTML = `<p class="col-span-full text-gray-500 text-sm">No video</p>`;
+      return;
+    }
+    items.forEach((video) => {
+      const div = document.createElement("div");
+      div.className = "border rounded overflow-hidden bg-white";
+      div.innerHTML = `
+        <video src="/${video.path}" class="w-full h-36 object-cover" muted playsinline></video>
+        <div class="p-2">
+          <button class="w-full text-xs border border-red-400 text-red-600 rounded py-1" data-action="delete-video" data-id="${video._id}">Delete</button>
+        </div>
+      `;
+      videoGridEl.appendChild(div);
+    });
+  }
+
+  folderTreeEl.addEventListener("click", async (e) => {
+    const btn = e.target.closest("[data-action]");
+    if (!btn) return;
+    const action = btn.dataset.action;
+    const id = btn.dataset.id;
+    if (action === "create-sub") return openFolderModal("create-sub", id);
+    if (action === "edit-folder") return openFolderModal("edit", id);
+    if (action === "select-sub") {
+      activeSubfolderId = String(id);
+      activeFolderLabelEl.textContent = `Subfolder: ${btn.dataset.name || id}`;
+      renderTree();
+      fetchImages();
+      return fetchVideos();
+    }
+    if (action === "delete-folder") {
+      if (!confirm("Delete folder?")) return;
+      const res = await fetch(`/admin/media/folders/${id}`, { method: "DELETE" });
+      const data = await res.json();
+      if (!data.success) return alert(data.mess || "Delete failed");
+      if (activeSubfolderId === String(id)) {
+        activeSubfolderId = "";
+        activeFolderLabelEl.textContent = "Subfolder: none";
+      }
+      await fetchTree();
+      fetchImages();
+      return fetchVideos();
+    }
+  });
+
+  imageGridEl.addEventListener("click", async (e) => {
+    const btn = e.target.closest('[data-action="delete-image"]');
+    if (!btn) return;
+    if (!confirm("Delete image?")) return;
+    const res = await fetch(`/admin/media/images/${btn.dataset.id}`, { method: "DELETE" });
+    const data = await res.json();
+    if (!data.success) return alert(data.mess || "Delete failed");
+    fetchImages();
+  });
+  videoGridEl.addEventListener("click", async (e) => {
+    const btn = e.target.closest('[data-action="delete-video"]');
+    if (!btn) return;
+    if (!confirm("Delete video?")) return;
+    const res = await fetch(`/admin/media/videos/${btn.dataset.id}`, { method: "DELETE" });
+    const data = await res.json();
+    if (!data.success) return alert(data.mess || "Delete failed");
+    fetchVideos();
+  });
+
+  document.getElementById("btnAddRoot").addEventListener("click", () => openFolderModal("create-root"));
+  document.getElementById("btnCancelFolderModal").addEventListener("click", closeFolderModal);
+  folderModal.addEventListener("click", (e) => { if (e.target === folderModal) closeFolderModal(); });
+
+  document.getElementById("btnSaveFolderModal").addEventListener("click", async () => {
+    const name = folderNameInput.value.trim();
+    if (!name) return alert("Folder name required");
+    if (folderModalMode === "edit") {
+      const res = await fetch(`/admin/media/folders/${editingFolderId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name }),
+      });
+      const data = await res.json();
+      if (!data.success) return alert(data.mess || "Update failed");
+    } else {
+      const parent_id = folderModalMode === "create-sub" ? folderParentSelect.value : "";
+      const res = await fetch("/admin/media/folders", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ name, parent_id }),
+      });
+      const data = await res.json();
+      if (!data.success) return alert(data.mess || "Create failed");
+    }
+    closeFolderModal();
+    await fetchTree();
+  });
+
+  document.getElementById("btnUpload").addEventListener("click", async () => {
+    const file = document.getElementById("uploadInput").files[0];
+    if (!file) return alert("Choose image first");
+    if (!activeSubfolderId) return alert("Please choose a subfolder before upload");
+    const fd = new FormData();
+    fd.append("image", file);
+    fd.append("folder_id", activeSubfolderId);
+    const res = await fetch("/admin/media/images/upload", { method: "POST", body: fd });
+    const data = await res.json();
+    if (!data.success) return alert(data.mess || "Upload failed");
+    document.getElementById("uploadInput").value = "";
+    fetchImages();
+  });
+  document.getElementById("btnUploadVideo").addEventListener("click", async () => {
+    const file = document.getElementById("uploadVideoInput").files[0];
+    if (!file) return alert("Choose video first");
+    if (!activeSubfolderId) return alert("Please choose a subfolder before upload");
+    const duration = await getVideoDuration(file).catch(() => 0);
+    if (!duration || duration > 10) return alert("Video phải <= 10 giây");
+    const fd = new FormData();
+    fd.append("video", file);
+    fd.append("folder_id", activeSubfolderId);
+    const res = await fetch("/admin/media/videos/upload", { method: "POST", body: fd });
+    const data = await res.json();
+    if (!data.success) return alert(data.mess || "Upload failed");
+    document.getElementById("uploadVideoInput").value = "";
+    fetchVideos();
+  });
+
+  fetchTree().then(() => {
+    fetchImages();
+    fetchVideos();
+  });
+</script>

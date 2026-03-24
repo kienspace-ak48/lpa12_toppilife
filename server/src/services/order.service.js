@@ -1,5 +1,6 @@
 const orderEntity = require("../model/order.model");
 const { sendMail } = require("./mail.service");
+const XLSX = require("xlsx");
 
 const CNAME = "order.service.js ";
 class OrderService {
@@ -122,6 +123,70 @@ class OrderService {
     } catch (error) {
       console.log(CNAME, error.message);
       return null;
+    }
+  }
+
+  async exportOrdersToExcel(startDate, endDate) {
+    try {
+      const where = {
+        $and: [{ $or: [{ isDeleted: false }, { isDeleted: { $exists: false } }] }],
+      };
+
+      const createdAt = {};
+      if (startDate) {
+        const start = new Date(startDate);
+        if (!Number.isNaN(start.getTime())) {
+          start.setHours(0, 0, 0, 0);
+          createdAt.$gte = start;
+        }
+      }
+      if (endDate) {
+        const end = new Date(endDate);
+        if (!Number.isNaN(end.getTime())) {
+          end.setHours(23, 59, 59, 999);
+          createdAt.$lte = end;
+        }
+      }
+      if (Object.keys(createdAt).length > 0) {
+        where.$and.push({ createdAt });
+      }
+
+      const orders = await orderEntity.find(where).sort({ createdAt: -1 }).lean();
+
+      const rows = orders.map((item, idx) => ({
+        STT: idx + 1,
+        // id: String(item._id || ""),
+        name: item.name || "",
+        phone: item.phone || "",
+        email: item.email || "",
+        address: item.address || "",
+        status: item.status || "new",
+        createdAt: item.createdAt
+          ? new Date(item.createdAt).toISOString()
+          : "",
+      }));
+
+      const workbook = XLSX.utils.book_new();
+      const worksheet = XLSX.utils.json_to_sheet(rows);
+      XLSX.utils.book_append_sheet(workbook, worksheet, "orders");
+
+      const fileName = `orders_${startDate || "all"}_${endDate || "all"}.xlsx`;
+      const buffer = XLSX.write(workbook, { type: "buffer", bookType: "xlsx" });
+
+      return {
+        success: true,
+        buffer,
+        fileName,
+        total: orders.length,
+      };
+    } catch (error) {
+      console.log(CNAME, error.message);
+      return {
+        success: false,
+        buffer: null,
+        fileName: "",
+        total: 0,
+      };
     }
   }
 }

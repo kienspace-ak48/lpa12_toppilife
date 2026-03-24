@@ -128,12 +128,15 @@ document.addEventListener("DOMContentLoaded", () => {
         .map((i) => i.trim())
         .filter((i) => i !== "");
     }
-    if (document.querySelector("#purchase_policy")) {
-      data.purchase_policy = document
-        .querySelector("#purchase_policy")
-        .value.split("\n")
-        .map((i) => i.trim())
-        .filter((i) => i !== "");
+    if (document.querySelector("#purchase_policy_wrapper")) {
+      const purchasePolicyArr = [];
+      document.querySelectorAll("#purchase_policy_wrapper .instance").forEach((el) => {
+        const icon = el.querySelector("[_icon]")?.value?.trim() || "Truck";
+        const text = el.querySelector("[_text]")?.value?.trim() || "";
+        if (!text) return;
+        purchasePolicyArr.push({ icon, text });
+      });
+      data.purchase_policy = purchasePolicyArr;
     }
     //
     if (document.querySelector("#hero_benefits")) {
@@ -142,6 +145,10 @@ document.addEventListener("DOMContentLoaded", () => {
         .value.split("\n")
         .map((i) => i.trim())
         .filter((i) => i !== "");
+    }
+    if (!data.hero_media_url && data.hero_img_url) {
+      // Backward compatibility for old records using hero_img_url only.
+      data.hero_media_url = data.hero_img_url;
     }
     //convert textarea -> array
 
@@ -181,62 +188,44 @@ targetWrapper.addEventListener("click", (ev) => {
   }
 });
 
-//
-//===================[ combo choose image ]===============//
-const chooseImgModal = document.querySelector("#gallery_modal");
-//   var ctaChooseImg = document.querySelectorAll("#banner_wrapper");
-let imgInputIsFocusing = null;
-function openChooseImgModal() {
-  chooseImgModal.classList.remove("hidden");
-  chooseImgModal.classList.add("flex");
-}
-function closeChooseImgModal() {
-  chooseImgModal.classList.remove("flex");
-  chooseImgModal.classList.add("hidden");
-}
-//
-function selectImage(src) {
-  imgInputIsFocusing.querySelector(".img_input").value = src;
-  imgInputIsFocusing.querySelector(".img_preview img").src = "/" + src;
-  closeChooseImgModal();
-}
-//
-function loadImage() {
-  imgList.innerHTML = "Loading...";
-  $.ajax({
-    url: "/admin/gallery/image-getall",
-    method: "GET",
-    success: (res) => {
-      if (res.success) {
-        imgList.innerHTML = "";
-        res.data.forEach((item) => {
-          const img = document.createElement("img");
-          img.src = "/" + item.path;
-          img.className = `
-            w-full h-32
-            object-cover
-            cursor-pointer rounded border
-            hover:ring-4 hover:ring-blue-500
-            transition
-          `;
-
-          img.onclick = () => selectImage(item.path);
-
-          imgList.appendChild(img);
-        });
-      }
+if (window.ImagePicker) {
+  window.ImagePicker.initImagePicker({
+    triggerSelector: ".chooseImg",
+    onSelect: (src, triggerEl) => {
+      const root = triggerEl?.closest(".image_action");
+      if (!root) return;
+      const input = root.querySelector(".img_input");
+      const preview = root.querySelector(".img_preview img");
+      if (input) input.value = src;
+      if (preview) preview.src = "/" + src;
     },
-    error: (xhr, status, err) =>
-      console.log(xhr.responseJSON?.mess || "Server error"),
+  });
+
+  const setHeroPreview = (path, mediaType) => {
+    const root = document.querySelector(".hero_media_action");
+    if (!root) return;
+    const mediaUrlInput = document.querySelector('[name="hero_media_url"]');
+    const mediaTypeInput = document.querySelector('[name="hero_media_type"]');
+    if (mediaUrlInput) mediaUrlInput.value = path;
+    if (mediaTypeInput) mediaTypeInput.value = mediaType;
+
+    const previewWrap = root.querySelector(".img_preview");
+    if (!previewWrap) return;
+    previewWrap.innerHTML =
+      mediaType === "video"
+        ? `<video src="/${path}" class="w-full h-full object-cover" controls muted playsinline></video>`
+        : `<img src="/${path}" class="w-full object-cover max-h-[200px]" />`;
+  };
+
+  window.ImagePicker.initImagePicker({
+    triggerSelector: ".chooseHeroImage",
+    mediaType: "image",
+    onSelect: (src) => setHeroPreview(src, "image"),
+  });
+
+  window.ImagePicker.initImagePicker({
+    triggerSelector: ".chooseHeroVideo",
+    mediaType: "video",
+    onSelect: (src) => setHeroPreview(src, "video"),
   });
 }
-//
-//Tuy bien
-document.addEventListener("click", (ev) => {
-  const btn = ev.target.closest(".chooseImg");
-  if (!btn) return;
-
-  loadImage();
-  imgInputIsFocusing = btn.closest(".image_action");
-  openChooseImgModal();
-});
