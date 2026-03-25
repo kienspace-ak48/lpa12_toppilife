@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   Phone,
   CheckCircle2,
@@ -20,10 +20,18 @@ import axios from "axios";
 import VideoCard from "./utils/VideoCard.js";
 import { Helmet } from "react-helmet-async";
 import { getLucideIconByName } from "./utils/lucideIcon";
+import Turnstile from "./components/turnstile";
 
-// http://localhost:8082/
-const ASSET_URL = "/"; //deploy thay => / "http://localhost:8082/
-const apiFetchLocal = "/api"; //deploy => /api http://localhost:8082/api
+let ASSET_URL = "" //http://localhost:8082/"; //deploy thay => / "http://localhost:8082/
+let apiFetchLocal ="" //"http://localhost:8082/api"; //deploy => /api http://localhost:8082/api
+if(import.meta.env.VITE_REACT_ENV === "development"){
+  ASSET_URL = "http://localhost:8082/";
+  apiFetchLocal = "http://localhost:8082/api";
+} else {
+  ASSET_URL = "/";
+  apiFetchLocal = "/api";
+}
+console.log('test', ASSET_URL)
 
 // --- Simulated Data ---
 const VIETNAMESE_NAMES = [
@@ -138,10 +146,6 @@ type TimeLeft = {
 const CountdownTimer2: React.FC<CountdownProps> = ({ endTime }) => {
   useEffect(() => {
     const parsedMs = endTime ? new Date(endTime).getTime() : NaN;
-    console.log("[CountdownTimer2] raw endTime:", endTime);
-    console.log("[CountdownTimer2] parsed ms:", parsedMs);
-    console.log("[CountdownTimer2] parsed ISO:", Number.isNaN(parsedMs) ? "Invalid Date" : new Date(parsedMs).toISOString());
-    console.log("[CountdownTimer2] now ISO:", new Date().toISOString());
   }, [endTime]);
 
   const calculateTimeLeft = (targetEndTime: string): TimeLeft => {
@@ -244,6 +248,8 @@ const PurchaseFrame = ({ id, data }: { id?: string; data: any }) => {
     address: "",
     email: "",
   });
+  const [cfTurnstileResponse, setCfTurnstileResponse] = useState("");
+  const [turnstileMountKey, setTurnstileMountKey] = useState(0);
   //dandle text
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
@@ -253,15 +259,31 @@ const PurchaseFrame = ({ id, data }: { id?: string; data: any }) => {
       [e.target.name]: e.target.value,
     });
   };
+  const skipTurnstileDev =
+    import.meta.env.VITE_SKIP_TURNSTILE === "true" ||
+    import.meta.env.VITE_SKIP_TURNSTILE === "1";
+
   //submit
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    if (!skipTurnstileDev && !cfTurnstileResponse) {
+      alert("Vui lòng hoàn tất xác minh bảo mật (Turnstile) phía trên trước khi đặt hàng.");
+      return;
+    }
     try {
-      const res = await axios.post(apiFetchLocal + "/order", form);
-      // console.log("tra ve gi ", res);
+      await axios.post(apiFetchLocal + "/order", {
+        ...form,
+        cfTurnstileResponse: skipTurnstileDev ? "" : cfTurnstileResponse,
+      });
       alert("Đặt đơn thành công");
-    } catch (error) {
-      alert("Có lỗi xảy ra");
+      setCfTurnstileResponse("");
+      setTurnstileMountKey((k) => k + 1);
+    } catch (error: unknown) {
+      const msg =
+        axios.isAxiosError(error) && error.response?.data?.mess
+          ? String(error.response.data.mess)
+          : "Có lỗi xảy ra";
+      alert(msg);
     }
   };
   return (
@@ -349,6 +371,20 @@ const PurchaseFrame = ({ id, data }: { id?: string; data: any }) => {
               className="w-full px-4 py-4 rounded-xl border-2 border-gray-100 focus:border-emerald-500 outline-none transition-all h-24 text-sm font-medium placeholder:text-gray-400 placeholder:font-bold resize-none"
             ></textarea>
           </div>
+
+          {!skipTurnstileDev && (
+            <div className="flex flex-col items-center gap-1 min-h-[65px] justify-center">
+              <Turnstile
+                key={turnstileMountKey}
+                onVerify={(token) => setCfTurnstileResponse(token)}
+              />
+              {!cfTurnstileResponse && (
+                <p className="text-[10px] text-amber-700 text-center px-2">
+                  Hoàn tất ô xác minh phía trên, sau đó bấm đặt hàng.
+                </p>
+              )}
+            </div>
+          )}
 
           <button
             type="submit"
@@ -519,7 +555,6 @@ const TargetAudience = ({ data }) => {
 };
 
 const VideoReviews = ({ data }) => {
-  // console.log(data);
   const videos = data?.review?.videos;
   // [
   //   { title: "Video đập hộp", label: "Unboxing" },
@@ -927,41 +962,148 @@ const Policies = ({ data }) => {
   );
 };
 
-const FeedbackMediaCard = ({
-  item,
-  expanded,
-  onToggle,
-}: {
-  item: any;
-  expanded: boolean;
-  onToggle: () => void;
-}) => {
-  const medias = [
-    ...(item?.images || []).map((src) => ({ type: "image", src })),
-    ...(item?.video_url ? [{ type: "video", src: item.video_url }] : []),
-  ];
-  const [activeIndex, setActiveIndex] = useState(0);
-  const active = medias[activeIndex] || null;
-  const toMediaUrl = (src: string) => {
-    if (!src) return "";
-    if (src.startsWith("http://") || src.startsWith("https://")) return src;
-    return `${ASSET_URL}${src}`;
-  };
-  const isYoutubeUrl = (src: string) =>
-    src.includes("youtube.com/") || src.includes("youtu.be/");
-  const toYoutubeEmbed10s = (src: string) => {
-    const normalized = src.replace("youtu.be/", "youtube.com/watch?v=");
-    const id = normalized.split("v=")[1]?.split("&")[0] || "";
-    if (!id) return "";
-    return `https://www.youtube.com/embed/${id}?start=0&end=10&autoplay=1&mute=1&controls=0&fs=0&rel=0&modestbranding=1`;
-  };
-  const keepPreview10s = (e: React.SyntheticEvent<HTMLVideoElement>) => {
-    const video = e.currentTarget;
-    if (video.currentTime > 10) {
-      video.currentTime = 0;
-      video.play().catch(() => {});
+const FEEDBACK_PREVIEW_MS = 8000;
+const FEEDBACK_VIDEO_CAP_SEC = 10;
+
+const feedbackToMediaUrl = (src: string) => {
+  if (!src) return "";
+  if (src.startsWith("http://") || src.startsWith("https://")) return src;
+  return `${ASSET_URL}${src}`;
+};
+
+const feedbackIsYoutubeUrl = (src: string) =>
+  src.includes("youtube.com/") || src.includes("youtu.be/");
+
+const feedbackYoutubeEmbed10s = (src: string) => {
+  const normalized = src.replace("youtu.be/", "youtube.com/watch?v=");
+  const id = normalized.split("v=")[1]?.split("&")[0] || "";
+  if (!id) return "";
+  return `https://www.youtube.com/embed/${id}?start=0&end=${FEEDBACK_VIDEO_CAP_SEC}&autoplay=1&mute=1&controls=0&fs=0&rel=0&modestbranding=1`;
+};
+
+type FeedbackThumbMedia = { type: "image" | "video"; src: string };
+
+const FeedbackMediaThumb = ({ media }: { media: FeedbackThumbMedia }) => {
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [ytActive, setYtActive] = useState(false);
+  const [showPlayHint, setShowPlayHint] = useState(true);
+
+  const clearTimer = () => {
+    if (timerRef.current) {
+      clearTimeout(timerRef.current);
+      timerRef.current = null;
     }
   };
+
+  const stopSelfVideo = () => {
+    clearTimer();
+    const v = videoRef.current;
+    if (v) {
+      v.pause();
+      v.currentTime = 0;
+    }
+    setShowPlayHint(true);
+  };
+
+  const playSelfVideo = () => {
+    const v = videoRef.current;
+    if (!v) return;
+    v.currentTime = 0;
+    setShowPlayHint(false);
+    v.play().catch(() => {});
+    clearTimer();
+    timerRef.current = setTimeout(() => {
+      v.pause();
+      v.currentTime = 0;
+      setShowPlayHint(true);
+    }, FEEDBACK_PREVIEW_MS);
+  };
+
+  const boxClass =
+    "w-16 h-16 rounded overflow-hidden border border-gray-200 shrink-0 relative";
+
+  if (media.type === "image") {
+    return (
+      <div className={`${boxClass} bg-white`}>
+        <img
+          src={feedbackToMediaUrl(media.src)}
+          alt=""
+          className="w-full h-full object-cover"
+          referrerPolicy="no-referrer"
+        />
+      </div>
+    );
+  }
+
+  if (feedbackIsYoutubeUrl(media.src)) {
+    return (
+      <div
+        className={`${boxClass} bg-black`}
+        onMouseEnter={() => setYtActive(true)}
+        onMouseLeave={() => setYtActive(false)}
+        onClick={() => setYtActive((x) => !x)}
+        role="presentation"
+      >
+        {ytActive ? (
+          <iframe
+            src={feedbackYoutubeEmbed10s(media.src)}
+            className="absolute inset-0 h-full w-full border-0"
+            title="feedback-video-preview"
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+          />
+        ) : (
+          <div className="flex h-full w-full items-center justify-center bg-gray-900">
+            <PlayCircle className="text-white/90" size={26} />
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  return (
+    <div
+      className={`${boxClass} bg-black`}
+      onMouseEnter={playSelfVideo}
+      onMouseLeave={stopSelfVideo}
+      onClick={(e) => {
+        e.stopPropagation();
+        playSelfVideo();
+      }}
+      role="presentation"
+    >
+      <video
+        ref={videoRef}
+        src={feedbackToMediaUrl(media.src)}
+        className="h-full w-full object-cover"
+        muted
+        playsInline
+        preload="metadata"
+        disablePictureInPicture
+        controlsList="nofullscreen nodownload noremoteplayback noplaybackrate"
+        onTimeUpdate={(e) => {
+          if (e.currentTarget.currentTime > FEEDBACK_VIDEO_CAP_SEC) {
+            e.currentTarget.currentTime = 0;
+            e.currentTarget.pause();
+            setShowPlayHint(true);
+            clearTimer();
+          }
+        }}
+      />
+      {showPlayHint && (
+        <div className="pointer-events-none absolute inset-0 flex items-center justify-center bg-black/35">
+          <PlayCircle className="text-white/90" size={26} />
+        </div>
+      )}
+    </div>
+  );
+};
+
+const FeedbackMediaCard = ({ item }: { item: any }) => {
+  const medias: FeedbackThumbMedia[] = [
+    ...(item?.images || []).map((src: string) => ({ type: "image" as const, src })),
+    ...(item?.video_url ? [{ type: "video" as const, src: item.video_url }] : []),
+  ];
 
   return (
     <div className="p-4 bg-gray-50 rounded-2xl border border-gray-100">
@@ -972,8 +1114,8 @@ const FeedbackMediaCard = ({
           className="w-9 h-9 rounded-full border object-cover"
           referrerPolicy="no-referrer"
         />
-        <div className="flex-1">
-          <div className="flex items-center gap-2">
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2 flex-wrap">
             <span className="font-bold text-sm">{item?.customer_name || "Khách hàng"}</span>
             <div className="flex text-red-500">
               {Array.from({ length: Number(item?.star || 5) }).map((_, z) => (
@@ -985,63 +1127,17 @@ const FeedbackMediaCard = ({
             {item?.createdAt ? new Date(item.createdAt).toLocaleString() : ""}
           </p>
         </div>
-        <button
-          type="button"
-          onClick={onToggle}
-          className="text-[11px] px-2 py-1 border rounded-md text-gray-600 hover:bg-gray-100"
-        >
-          {expanded ? "Thu gọn" : "Xem media"}
-        </button>
       </div>
 
-      <p className="text-xs text-gray-700 leading-relaxed whitespace-pre-line line-clamp-2">
+      <p className="text-xs text-gray-700 leading-relaxed whitespace-pre-line line-clamp-4">
         {item?.comment}
       </p>
 
-      {expanded && medias.length > 0 && (
-        <div className="mt-3">
-          <div className="flex gap-2 mb-2">
-            {medias.map((m, idx) => (
-              <button
-                key={idx}
-                type="button"
-                onClick={() => setActiveIndex(idx)}
-                className={`border ${idx === activeIndex ? "border-red-500" : "border-gray-200"} rounded-md overflow-hidden`}
-              >
-                <div className="w-16 h-16 bg-white flex items-center justify-center">
-                  {m.type === "image" ? (
-                    <img src={toMediaUrl(m.src)} className="w-full h-full object-cover" referrerPolicy="no-referrer" />
-                  ) : (
-                    <PlayCircle size={24} className="text-gray-600" />
-                  )}
-                </div>
-              </button>
-            ))}
-          </div>
-          <div className="rounded-xl overflow-hidden border bg-white">
-            {active?.type === "image" ? (
-              <img src={toMediaUrl(active.src)} className="w-full max-h-[420px] object-contain" referrerPolicy="no-referrer" />
-            ) : isYoutubeUrl(active?.src || "") ? (
-              <iframe
-                src={toYoutubeEmbed10s(active?.src || "")}
-                className="w-full max-h-[320px] aspect-video"
-                title="feedback-video-preview"
-              />
-            ) : (
-              <video
-                src={toMediaUrl(active?.src || "")}
-                className="w-full max-h-[320px] object-cover"
-                muted
-                playsInline
-                autoPlay
-                loop
-                controls={false}
-                disablePictureInPicture
-                controlsList="nofullscreen nodownload noremoteplayback noplaybackrate"
-                onTimeUpdate={keepPreview10s}
-              />
-            )}
-          </div>
+      {medias.length > 0 && (
+        <div className="mt-3 flex flex-wrap gap-2">
+          {medias.map((m, idx) => (
+            <FeedbackMediaThumb key={idx} media={m} />
+          ))}
         </div>
       )}
     </div>
@@ -1086,7 +1182,6 @@ const Footer = ({ data }) => {
 export default function App() {
   const [pageData, setPageData] = useState(null);
   const [feedbackItems, setFeedbackItems] = useState<any[]>([]);
-  const [openFeedbackId, setOpenFeedbackId] = useState<string>("");
   const apiLandingPage = apiFetchLocal + "/landing";
   const apiFeedbackPage = apiFetchLocal + "/feedback";
   const totalReviews = feedbackItems.length;
@@ -1098,7 +1193,6 @@ export default function App() {
     fetch(apiLandingPage)
       .then((res) => res.json())
       .then((data) => {
-        // console.log(data.data);
         setPageData(data.data);
       });
   }, []);
@@ -1111,6 +1205,115 @@ export default function App() {
       })
       .catch(() => setFeedbackItems([]));
   }, []);
+
+  // Inject GG metatag snippets (gg_a -> head, gg_wt -> body) after page config is loaded.
+  useEffect(() => {
+    if (!pageData) return;
+
+    const headContainerId = "gg_a_snippet_container";
+    const bodyContainerId = "gg_wt_snippet_container";
+
+    const removeInjected = () => {
+      document.getElementById(headContainerId)?.remove();
+      document.getElementById(bodyContainerId)?.remove();
+    };
+
+    const isSkippable = (s: unknown) => {
+      const v = String(s ?? "").trim();
+      return !v || v === "--no--";
+    };
+
+    // Handle cases where snippet is stored as HTML-escaped text
+    const decodeSnippet = (s: string) => {
+      // Minimal decode common HTML entities
+      return s
+        .replaceAll("&lt;", "<")
+        .replaceAll("&gt;", ">")
+        .replaceAll("&quot;", '"')
+        .replaceAll("&#39;", "'")
+        .replaceAll("&amp;", "&");
+    };
+
+    const injectIntoHead = (snippet: string) => {
+      const head = document.head;
+      if (!head) return;
+
+      const decoded = decodeSnippet(snippet);
+
+      const container = document.createElement("div");
+      container.id = headContainerId;
+      container.dataset.ggMeta = "gg_a";
+
+      // If snippet is plain JS (no <script> tag), wrap it.
+      if (!decoded.includes("<script") && !decoded.includes("<noscript") && !decoded.includes("<iframe") && !decoded.includes("<")) {
+        const s = document.createElement("script");
+        s.text = decoded;
+        container.appendChild(s);
+      } else {
+        container.innerHTML = decoded;
+
+        // Replace script tags so they execute
+        container.querySelectorAll("script").forEach((oldScript) => {
+          const s = document.createElement("script");
+          Array.from(oldScript.attributes || []).forEach((attr) => {
+            s.setAttribute(attr.name, attr.value);
+          });
+          const src = (oldScript as HTMLScriptElement).src;
+          if (src) s.src = src;
+          else s.text = oldScript.textContent || "";
+          oldScript.replaceWith(s);
+        });
+      }
+
+      head.appendChild(container);
+    };
+
+    const injectIntoBody = (snippet: string) => {
+      const body = document.body;
+      if (!body) return;
+
+      const decoded = decodeSnippet(snippet);
+
+      const container = document.createElement("div");
+      container.id = bodyContainerId;
+      container.dataset.ggMeta = "gg_wt";
+
+      // If snippet is plain JS (no tags), wrap it.
+      if (!decoded.includes("<script") && !decoded.includes("<noscript") && !decoded.includes("<iframe") && !decoded.includes("<")) {
+        const s = document.createElement("script");
+        s.text = decoded;
+        container.appendChild(s);
+      } else {
+        container.innerHTML = decoded;
+
+        container.querySelectorAll("script").forEach((oldScript) => {
+          const s = document.createElement("script");
+          Array.from(oldScript.attributes || []).forEach((attr) => {
+            s.setAttribute(attr.name, attr.value);
+          });
+          const src = (oldScript as HTMLScriptElement).src;
+          if (src) s.src = src;
+          else s.text = oldScript.textContent || "";
+          oldScript.replaceWith(s);
+        });
+      }
+
+      // Put it at the beginning of body.
+      body.prepend(container);
+    };
+
+    removeInjected();
+
+    const ggA = pageData?.customize?.gg_a;
+    const ggWT = pageData?.customize?.gg_wt;
+
+
+    if (!isSkippable(ggA)) injectIntoHead(String(ggA));
+    if (!isSkippable(ggWT)) injectIntoBody(String(ggWT));
+
+    return removeInjected;
+  }, [pageData]);
+
   if (!pageData) {
     return (
       <>
@@ -1189,15 +1392,7 @@ export default function App() {
               </div>
               <div className="space-y-4">
                 {(feedbackItems || []).map((f, i) => (
-                  <FeedbackMediaCard
-                    item={f}
-                    key={f?._id || i}
-                    expanded={openFeedbackId === String(f?._id || i)}
-                    onToggle={() => {
-                      const nextId = String(f?._id || i);
-                      setOpenFeedbackId((prev) => (prev === nextId ? "" : nextId));
-                    }}
-                  />
+                  <FeedbackMediaCard item={f} key={f?._id || i} />
                 ))}
               </div>
             </div>

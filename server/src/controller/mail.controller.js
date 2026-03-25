@@ -20,7 +20,7 @@ const emailController = () => {
         .replaceAll("{{orderId}}", "DH123456")
         .replaceAll("{{customerName}}", "Nguyễn Văn A")
         .replaceAll("{{customerEmail}}", "a@gmail.com")
-        .replaceAll("{{totalAmount}}", "1.500.000đ")
+        // .replaceAll("{{totalAmount}}", "1.500.000đ")
         .replaceAll("{{orderLink}}", "https://yourdomain.com/orders/123");
         
         //
@@ -39,7 +39,7 @@ const emailController = () => {
         res.status(500).json({ success: false, mess: "failed" });
       }
     },
-  };
+  }
 };
 
 module.exports = emailController;

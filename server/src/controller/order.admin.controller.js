@@ -11,6 +11,7 @@ const orderAdminController = () => {
         const keyword = (req.query.keyword || "").trim();
         const startDate = (req.query.startDate || "").trim();
         const endDate = (req.query.endDate || "").trim();
+        const orderId = (req.query.orderId || "").trim();
         const page = parseInt(req.query.page, 10) || 1;
         const limit = parseInt(req.query.limit, 10) || 10;
         const data = await orderService.getAll({ status, keyword, page, limit });
@@ -20,6 +21,7 @@ const orderAdminController = () => {
           filter: { status, keyword, startDate, endDate },
           pagination: data.pagination,
           statuses: ["new", "processing", "completed", "cancelled"],
+          highlightOrderId: orderId,
         });
       } catch (error) {
         console.log(CNAME, error.message);
@@ -28,6 +30,7 @@ const orderAdminController = () => {
           filter: { status: "", keyword: "", startDate: "", endDate: "" },
           pagination: { page: 1, totalPages: 1, total: 0, limit: 10 },
           statuses: ["new", "processing", "completed", "cancelled"],
+          highlightOrderId: "",
         });
       }
     },

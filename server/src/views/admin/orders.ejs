@@ -1,6 +1,9 @@
 <h1 class="text-xl font-bold mb-4">Order management</h1>
 
 <form method="GET" action="/admin/orders" class="grid grid-cols-1 md:grid-cols-4 gap-3 mb-5">
+  <% if (typeof highlightOrderId !== 'undefined' && highlightOrderId) { %>
+  <input type="hidden" name="orderId" value="<%= highlightOrderId %>" />
+  <% } %>
   <input
     type="text"
     name="keyword"
@@ -60,7 +63,8 @@
         </tr>
       <% } %>
       <% (orders || []).forEach(function(order){ %>
-        <tr class="border-b hover:bg-gray-50" data-row-id="<%= order._id %>">
+        <% var hid = (typeof highlightOrderId !== 'undefined' && highlightOrderId && String(order._id) === String(highlightOrderId)); %>
+        <tr class="border-b hover:bg-gray-50 transition-colors <%= hid ? 'ring-2 ring-inset ring-emerald-500 bg-emerald-50' : '' %>" data-row-id="<%= order._id %>" id="order-row-<%= order._id %>">
           <td class="p-3"><%= order.name %></td>
           <td class="p-3"><%= order.phone %></td>
           <td class="p-3"><%= order.email %></td>
@@ -100,14 +104,15 @@
   <div class="space-x-2">
     <% const prevPage = Math.max(1, pagination.page - 1); %>
     <% const nextPage = Math.min(pagination.totalPages, pagination.page + 1); %>
+    <% const oidQ = (typeof highlightOrderId !== 'undefined' && highlightOrderId) ? ('&orderId=' + encodeURIComponent(highlightOrderId)) : ''; %>
     <a
       class="px-3 py-1 border rounded <%= pagination.page <= 1 ? 'pointer-events-none opacity-50' : '' %>"
-      href="/admin/orders?page=<%= prevPage %>&limit=<%= pagination.limit %>&status=<%= filter.status %>&keyword=<%= encodeURIComponent(filter.keyword || '') %>"
+      href="/admin/orders?page=<%= prevPage %>&limit=<%= pagination.limit %>&status=<%= filter.status %>&keyword=<%= encodeURIComponent(filter.keyword || '') %><%= oidQ %>"
     >Prev</a>
     <span>Page <%= pagination.page %>/<%= pagination.totalPages %></span>
     <a
       class="px-3 py-1 border rounded <%= pagination.page >= pagination.totalPages ? 'pointer-events-none opacity-50' : '' %>"
-      href="/admin/orders?page=<%= nextPage %>&limit=<%= pagination.limit %>&status=<%= filter.status %>&keyword=<%= encodeURIComponent(filter.keyword || '') %>"
+      href="/admin/orders?page=<%= nextPage %>&limit=<%= pagination.limit %>&status=<%= filter.status %>&keyword=<%= encodeURIComponent(filter.keyword || '') %><%= oidQ %>"
     >Next</a>
   </div>
 </div>
@@ -159,4 +164,13 @@
       }
     });
   });
+
+  (function highlightOrderFromQuery() {
+    const params = new URLSearchParams(window.location.search);
+    const oid = params.get("orderId");
+    if (!oid) return;
+    const row = document.getElementById("order-row-" + oid) || document.querySelector(`tr[data-row-id="${oid}"]`);
+    if (!row) return;
+    row.scrollIntoView({ behavior: "smooth", block: "center" });
+  })();
 </script>

@@ -5,6 +5,8 @@ import path from 'path';
 
 // https://vite.dev/config/
 export default defineConfig({
+  /** Đảm bảo đọc `client/.env` dù chạy lệnh từ thư mục nào */
+  envDir: path.resolve(__dirname),
   plugins: [react(), tailwindcss()],
   resolve: {
     alias: {

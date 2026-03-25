@@ -146,6 +146,26 @@
           class="w-full border border-gray-300 rounded-lg px-3 py-2"
         />
       </div>
+
+      <div class="py-2">
+        <label class="font-medium">GG Metatag A</label>
+        <textarea
+          id="gg_a"
+          rows="4"
+          class="w-full border border-gray-300 rounded-lg px-3 py-2"
+          placeholder="--no-- hoặc giá trị từ Google"
+        ><%=data?.customize?.gg_a || ''%></textarea>
+      </div>
+
+      <div class="py-2">
+        <label class="font-medium">GG Metatag WT</label>
+        <textarea
+          id="gg_wt"
+          rows="4"
+          class="w-full border border-gray-300 rounded-lg px-3 py-2"
+          placeholder="--no-- hoặc giá trị từ Google"
+        ><%=data?.customize?.gg_wt || ''%></textarea>
+      </div>
     </div>
     <!-- right -->
     <div>
@@ -222,6 +242,8 @@
       canonical: document.getElementById("canonical").value,
       desc: document.getElementById("desc").value,
       keywords: document.getElementById("keywords").value,
+      gg_a: document.getElementById("gg_a").value,
+      gg_wt: document.getElementById("gg_wt").value,
       img: document.querySelector("[name='website_img']").value,
     };
 

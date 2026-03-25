@@ -108,7 +108,27 @@ const pageConfigSchema = new mongoose.Schema({
     }
   },
   customize: {
-  }
+    // Contact / social links
+    email: String,
+    phone: String,
+    zalo: String,
+    address: String,
+    facebook: String,
+    tiktok: String,
+    youtube: String,
+    worktime: String,
+
+    // SEO
+    title: String,
+    canonical: String,
+    img: String,
+    desc: String,
+    keywords: String,
+
+    // Google metatag config fields
+    gg_a: String,
+    gg_wt: String,
+  },
 }, {timestamps: true});
 
 module.exports = mongoose.model('page_config', pageConfigSchema);

@@ -13,18 +13,27 @@ class OrderService {
       const order = new orderEntity(data);
       //save vao db
       const task1 = await order.save();
+      // const baseUrl = (process.env.APP_URL || "http://localhost:8082").replace(/\/$/, "");
+      let baseUrl =""
+      if(process.env.NODE_ENV === 'production'){
+        baseUrl = process.env.WEBSITE_LINK;
+      } else {
+        baseUrl = "http://localhost:8082";
+      }
+      console.log('test baseUrl: ', baseUrl);
+      const orderIdStr = String(task1._id || "");
       const payload ={
         from: 'LPA12 - Toppilife <info.kienvu.vn>',
         to: 'kienvu.dev@gmail.com, q.giang2508@gmail.com', //q.giang2508@gmail.com
         subject: 'Bạn có đơn hàng mới từ LPA12',
         dataMail: {
           // Take values from saved DB record instead of hard-code
-          order_id: String(task1._id || ""),
+          order_id: orderIdStr,
           order_name: task1.name || "",
           order_email: task1.email || "",
           order_phone: task1.phone || "",
           order_price: task1.price || "",
-          order_link: `${process.env.APP_URL || "http://localhost:8082"}/admin/orders`,
+          order_link: `${baseUrl}/admin/orders?orderId=${encodeURIComponent(orderIdStr)}`,
         }
       }
       // Send mail in background so client does not wait for SMTP latency.

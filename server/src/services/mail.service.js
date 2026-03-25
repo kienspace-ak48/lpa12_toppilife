@@ -15,7 +15,6 @@ const sendMail = async ({ from, to, subject, dataMail, html }) => {
       .replaceAll("{{orderId}}", dataMail.order_id)
       .replaceAll("{{customerName}}", dataMail.order_name)
       .replaceAll("{{customerEmail}}", dataMail.order_email)
-      .replaceAll("{{totalAmount}}", dataMail.order_price)
       .replaceAll("{{orderLink}}", dataMail.order_link)
       .replaceAll("{{customerPhone}}", dataMail.order_phone);
 
