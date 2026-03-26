@@ -8,7 +8,6 @@ const orderAdminController = require("../controller/order.admin.controller")();
 const feedbackAdminController = require("../controller/feedback.admin.controller")();
 const mediaLibraryRoute = require("./mediaLibrary.route");
 const uploadImage = require("../config/uploadImage.config");
-const visitModel = require('../model/visit.model')
 
 // -cutomize
 router.get('/page-config/customize-section', pageConfigController.CustomizeSection);
@@ -48,31 +47,8 @@ router.put("/feedbacks/:id", feedbackAdminController.Update);
 router.delete("/feedbacks/:id", feedbackAdminController.Delete);
 
 router.get("/", async (req, res) => {
-  const total = await visitModel.countDocuments();
 
-  const today = new Date();
-  today.setHours(0, 0, 0, 0);
-
-  const todayCount = await visitModel.countDocuments({
-    createdAt: { $gte: today },
-  });
-
-  const topPages = await visitModel.aggregate([
-    { $group: { _id: "$path", count: { $sum: 1 } } },
-    { $sort: { count: -1 } },
-    { $limit: 5 },
-  ]);
-
-  res.render("admin/dashboard", {
-    stats: {
-      total,
-      today: todayCount,
-      topPages: topPages.map((i) => ({
-        path: i._id,
-        count: i.count,
-      })),
-    },
-  });
+  res.render("admin/dashboard");
 });
 
 module.exports = router;

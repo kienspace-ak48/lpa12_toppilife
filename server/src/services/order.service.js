@@ -20,11 +20,11 @@ class OrderService {
       } else {
         baseUrl = "http://localhost:8082";
       }
-      console.log('test baseUrl: ', baseUrl);
+      // console.log('test baseUrl: ', baseUrl);
       const orderIdStr = String(task1._id || "");
       const payload ={
-        from: 'LPA12 - Toppilife <info.kienvu.vn>',
-        to: 'kienvu.dev@gmail.com, q.giang2508@gmail.com', //q.giang2508@gmail.com
+        from: 'LPA12 - Toppilife <info.lpa12toppilife.vn>',
+        to: 'toppilife.vn@gmail.com', //q.giang2508@gmail.com
         subject: 'Bạn có đơn hàng mới từ LPA12',
         dataMail: {
           // Take values from saved DB record instead of hard-code
@@ -32,7 +32,7 @@ class OrderService {
           order_name: task1.name || "",
           order_email: task1.email || "",
           order_phone: task1.phone || "",
-          order_price: task1.price || "",
+          order_address: task1.address || "",
           order_link: `${baseUrl}/admin/orders?orderId=${encodeURIComponent(orderIdStr)}`,
         }
       }
@@ -43,7 +43,7 @@ class OrderService {
       if(!task1){
         return false;
       }
-      console.log(task1);
+      // console.log(task1);
       return true;
     } catch (error) {
       console.log(CNAME, error.message);

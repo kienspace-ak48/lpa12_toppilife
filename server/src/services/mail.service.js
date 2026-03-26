@@ -6,7 +6,6 @@ const myPathConfig = require("../config/myPath.config");
 
 const sendMail = async ({ from, to, subject, dataMail, html }) => {
   try {
-    console.log('data input: ', from, to, subject, dataMail, html);
     const filePath = path.join(myPathConfig.root,"/src/views/template_files/mail_one.html",);
     //doc noi dung cua file
     const template = fs.readFileSync(filePath, "utf-8");
@@ -16,7 +15,8 @@ const sendMail = async ({ from, to, subject, dataMail, html }) => {
       .replaceAll("{{customerName}}", dataMail.order_name)
       .replaceAll("{{customerEmail}}", dataMail.order_email)
       .replaceAll("{{orderLink}}", dataMail.order_link)
-      .replaceAll("{{customerPhone}}", dataMail.order_phone);
+      .replaceAll("{{customerPhone}}", dataMail.order_phone)
+      .replaceAll("{{customerAddress}}", dataMail.order_address || "");
 
     //
     const payload = {

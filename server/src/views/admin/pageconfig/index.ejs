@@ -43,7 +43,8 @@
       placeholder="Description"
       class="border w-full px-3 py-2 rounded"
     ><%=pc?.hero?.desc ||''%></textarea>
-
+    <!-- hero media type -->
+    <h4 class="font-semibold pt-3">Hero Media(1000x1000)</h4>
     <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mt-2">
       <select name="hero_media_type" class="border w-full px-3 py-2 rounded">
         <option value="image" <%= (pc?.hero?.media_type || "image") === "image" ? "selected" : "" %>>Image</option>
@@ -175,7 +176,7 @@
     />
 
     <!--  -->
-      <h5 class="font-bold">Image <small>(1000x400)</small></h5>
+      <h5 class="font-bold">Image <small>(760x400)</small></h5>
     <!-- image handle action -->
 <div class="image_action">
   <!-- <label for="">Image banner</label> -->
@@ -204,7 +205,8 @@
 </div>
     <!--  -->
     <div class="flex justify-between items-center pt-3">
-      <h5 class="font-bold">Policy (Icon + Text)</h5>
+      <h5 class="font-bold">Policy (Icon + Text) |            <a target="_blank"  href="https://lucide.dev/icons/"><small class="text-red-500">Icon phải được viết hoa kiểu(PascalCase)</small><i class="text-blue-500 hover:cursor-pointer fa-regular fa-circle-question hover:scale-150"></i></a>
+      </h5>
       <button
         type="button"
         id="cta_add_purchase_policy"
@@ -284,7 +286,7 @@
 
   <div class="flex justify-between items-center">
 
-    <h4 class="font-semibold mt-4">Cards</h4>
+    <h4 class="font-semibold mt-4">Cards (500x500)</h4>
     <button
     type="button"
     id="cta_add_target_card"
@@ -438,7 +440,7 @@
     <input type="text" value="<%=pc?.teachnology?.title%>" name="teachnology_title" class="px-3 py-2 w-full border border-gray-300 rounded-lg" placeholder="teachnology title">
     <input type="text" value="<%=pc?.teachnology?.desc%>" name="teachnology_desc" class="px-3 py-2 w-full border border-gray-300 rounded-lg" placeholder="teachnology desc">
     <div class="flex justify-between items-center py-2" >
-      <h4 class="font-bold">Teachnology</h4>
+      <h4 class="font-bold">Teachnology (400x700)</h4>
       <button type="button" id="cta_add_teachnology_card" class="px-3 py-2 border border-gray-300 rounded-lg bg-green-500 text-white font-bold">Add video component</button>
     </div>
     <div id="teachnology_wrapper" class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -500,7 +502,7 @@
   <div class="p-4" id="featured">
     <input type="text" value="<%=pc?.is_featured?.title%>" name="featured_title" class="px-3 py-2 w-full border border-gray-300 rounded-lg" placeholder="featured title">
     <div class="flex justify-between items-center py-2" >
-      <h4 class="font-bold">featured</h4>
+      <h4 class="font-bold">featured(500x500)</h4>
       <button type="button" id="cta_add_featured_card" class="px-3 py-2 border border-gray-300 rounded-lg bg-green-500 text-white font-bold">Add video component</button>
     </div>
     <div id="featured_wrapper" class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -556,6 +558,7 @@
   <div class="p-4" id="box_content">
     <input type="text" value="<%=pc?.box_content?.title%>" name="box_content_title" class="px-3 py-2 w-full border border-gray-300 rounded-lg" placeholder="box_content title">
     <!-- image handle action -->
+     <h5 class="font-bold">Image <small>(500x500)</small></h5>
     <div class="image_action">
       <!-- <label for="">Image banner</label> -->
       <div class="flex justify-between items-center mt-3">
@@ -598,7 +601,7 @@
     <input type="text" value="<%=pc?.usage_instruction?.title%>" name="usage_instruction_title" class="px-3 py-2 w-full border border-gray-300 rounded-lg" placeholder="box_content title">
     <input type="text" value="<%=pc?.usage_instruction?.note%>" name="usage_instruction_note" class="px-3 py-2 w-full border border-gray-300 rounded-lg" placeholder="box_content note">
     <div class="flex justify-between items-center py-2" >
-      <h4 class="font-bold">usage_instruction</h4>
+      <h4 class="font-bold">usage_instruction(500x500)</h4>
       <button type="button" id="cta_add_usage_instruction_card" class="px-3 py-2 border border-gray-300 rounded-lg bg-green-500 text-white font-bold">Add video component</button>
     </div>
     <div id="usage_instruction_wrapper" class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -658,7 +661,7 @@
   <div class="p-4" id="body_area">
     <input type="text" value="<%=pc?.body_area?.title%>" name="body_area_title" class="px-3 py-2 w-full border border-gray-300 rounded-lg" placeholder="box_content title">
     <div class="flex justify-between items-center py-2" >
-      <h4 class="font-bold">body_area</h4>
+      <h4 class="font-bold">body_area(500x500)</h4>
       <button type="button" id="cta_add_body_area_card" class="px-3 py-2 border border-gray-300 rounded-lg bg-green-500 text-white font-bold">Add video component</button>
     </div>
     <div id="body_area_wrapper" class="grid grid-cols-1 md:grid-cols-2 gap-4">

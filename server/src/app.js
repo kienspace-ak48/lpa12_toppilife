@@ -37,7 +37,7 @@ router(app);
 
 //test area
 app.get("/test", (req, res) => {
-  res.json({ success: true, mess: "hello world" });
+  res.json({ success: true, data: {author: "KienVu", version: "1.0"} });
 });
 app.get('/api/landing', async(req, res)=>{
   try {

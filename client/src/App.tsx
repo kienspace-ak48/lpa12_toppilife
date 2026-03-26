@@ -240,6 +240,10 @@ const CountdownTimer = () => {
   );
 };
 
+const ORDER_ADDRESS_MAX = 80;
+const ORDER_NAME_MAX = 50;
+const ORDER_PHONE_MAX = 20;
+
 const PurchaseFrame = ({ id, data }: { id?: string; data: any }) => {
   //handle form
   const [form, setForm] = useState({
@@ -254,9 +258,13 @@ const PurchaseFrame = ({ id, data }: { id?: string; data: any }) => {
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>,
   ) => {
+    const { name, value } = e.target;
+    if (name === "address" && value.length > ORDER_ADDRESS_MAX) return;
+    if (name === "name" && value.length > ORDER_NAME_MAX) return;
+    if (name === "phone" && value.length > ORDER_PHONE_MAX) return;
     setForm({
       ...form,
-      [e.target.name]: e.target.value,
+      [name]: value,
     });
   };
   const skipTurnstileDev =
@@ -270,14 +278,43 @@ const PurchaseFrame = ({ id, data }: { id?: string; data: any }) => {
       alert("Vui lòng hoàn tất xác minh bảo mật (Turnstile) phía trên trước khi đặt hàng.");
       return;
     }
+    const name = form.name.trim();
+    const phone = form.phone.trim();
+    const email = form.email.trim();
+    const address = form.address.trim();
+    if (!name || name.length > ORDER_NAME_MAX) {
+      alert(`Vui lòng nhập họ tên (tối đa ${ORDER_NAME_MAX} ký tự).`);
+      return;
+    }
+    if (!phone || phone.length > ORDER_PHONE_MAX || !/^[\d\s+().-]{8,}$/.test(phone)) {
+      alert("Vui lòng nhập số điện thoại hợp lệ.");
+      return;
+    }
+    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+      alert("Vui lòng nhập email hợp lệ.");
+      return;
+    }
+    if (!address || address.length > ORDER_ADDRESS_MAX) {
+      alert(`Địa chỉ nhận hàng không quá ${ORDER_ADDRESS_MAX} ký tự.`);
+      return;
+    }
     try {
       await axios.post(apiFetchLocal + "/order", {
-        ...form,
+        name,
+        phone,
+        email,
+        address,
         cfTurnstileResponse: skipTurnstileDev ? "" : cfTurnstileResponse,
       });
       alert("Đặt đơn thành công");
       setCfTurnstileResponse("");
       setTurnstileMountKey((k) => k + 1);
+      setForm({
+        name: "",
+        phone: "",
+        address: "",
+        email: "",
+      });
     } catch (error: unknown) {
       const msg =
         axios.isAxiosError(error) && error.response?.data?.mess
@@ -337,6 +374,7 @@ const PurchaseFrame = ({ id, data }: { id?: string; data: any }) => {
               required
               name="name"
               onChange={handleChange}
+              value={form.name}
               type="text"
               placeholder="Họ và tên của bạn"
               className="w-full px-4 py-4 rounded-xl border-2 border-gray-100 focus:border-emerald-500 outline-none transition-all text-sm font-medium placeholder:text-gray-400 placeholder:font-bold"
@@ -347,6 +385,7 @@ const PurchaseFrame = ({ id, data }: { id?: string; data: any }) => {
               required
               name="phone"
               onChange={handleChange}
+              value={form.phone}
               type="tel"
               placeholder="Số điện thoại liên hệ"
               className="w-full px-4 py-4 rounded-xl border-2 border-gray-100 focus:border-emerald-500 outline-none transition-all text-sm font-medium placeholder:text-gray-400 placeholder:font-bold"
@@ -357,6 +396,7 @@ const PurchaseFrame = ({ id, data }: { id?: string; data: any }) => {
               required
               name="email"
               onChange={handleChange}
+              value={form.email}
               type="email"
               placeholder="Email liên hệ"
               className="w-full px-4 py-4 rounded-xl border-2 border-gray-100 focus:border-emerald-500 outline-none transition-all text-sm font-medium placeholder:text-gray-400 placeholder:font-bold"
@@ -366,7 +406,9 @@ const PurchaseFrame = ({ id, data }: { id?: string; data: any }) => {
             <textarea
               required
               name="address"
+              maxLength={ORDER_ADDRESS_MAX}
               onChange={handleChange}
+              value={form.address}
               placeholder="Địa chỉ nhận hàng chi tiết"
               className="w-full px-4 py-4 rounded-xl border-2 border-gray-100 focus:border-emerald-500 outline-none transition-all h-24 text-sm font-medium placeholder:text-gray-400 placeholder:font-bold resize-none"
             ></textarea>
@@ -1387,7 +1429,7 @@ export default function App() {
                   />
                 ))}
                 <span className="ml-2 font-bold text-gray-900">
-                  {avgRating.toFixed(1)}/5 ({totalReviews} đánh giá)
+                  {avgRating.toFixed(1)}/5
                 </span>
               </div>
               <div className="space-y-4">

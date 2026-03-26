@@ -88,25 +88,6 @@ router.post("/admin/logout", (req, res) => {
   res.set("Expires", "0");
   res.redirect("/auth/admin/login");
 });
-//
-router.get("/register", async (res, req) => {
-  // const u = new user
-  const password = "123@"
-  const passwordHash = bcrypt.hashSync(password, 12);
-  try {
-    const u = new userEntity({
-      username: "toppicare_lpa12",
-      password: passwordHash,
-      email: "admin@gmail.com",
-      name: "Toppicare LPA12",
-      status: true,
-    });
-    const task1 = await u.save();
-    res.success(task1);
-  } catch (err) {
-    console.log(err.message);
-    res.error("Server error");
-  }
-});
+
 
 module.exports = router;
