@@ -2,38 +2,7 @@
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
 
 <url>
-<loc>https://toppicare.vn/</loc>
+<loc>https://lpa12.toppilife.vn/</loc>
 </url>
 
-<url>
-<loc>https://toppicare.vn/gioi-thieu</loc>
-</url>
-
-<url>
-<loc>https://toppicare.vn/dich-vu</loc>
-</url>
-
-<url>
-<loc>https://toppicare.vn/tin-tuc</loc>
-</url>
-
-<url>
-<loc>https://toppicare.vn/lien-he</loc>
-</url>
-
-<url>
-<loc>https://toppicare.vn/tuyen-ky-thuat-vien</loc>
-</url>
-
-<url>
-<loc>https://toppicare.vn/trung-tam-ho-tro</loc>
-</url>
-
-<url>
-<loc>https://toppicare.vn/app</loc>
-</url>
-
-<url>
-<loc>https://toppicare.vn/api/action-link/download-app</loc>
-</url>
 </urlset>

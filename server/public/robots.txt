@@ -1,4 +1,9 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://toppicare.vn/sitemap.xml
+# Không lập chỉ mục khu vực quản trị, API và luồng xác thực
+Disallow: /admin
+Disallow: /api
+Disallow: /auth
+
+Sitemap: https://lpa12.toppilife.vn/sitemap.xml

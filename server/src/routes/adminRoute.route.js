@@ -16,7 +16,6 @@ router.put('/page-config/customize-section', pageConfigController.SaveCustomizeS
 router.post('/page-config/create-update', pageConfigController.SaveAndUpdate);
 router.get('/page-config', pageConfigController.Index);
 //
-router.get('/test', homeController.Test);
 
 //
 router.delete("/gallery/image-delete", galleryController.DeleteImage);

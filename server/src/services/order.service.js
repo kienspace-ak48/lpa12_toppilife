@@ -24,7 +24,7 @@ class OrderService {
       const orderIdStr = String(task1._id || "");
       const payload ={
         from: 'LPA12 - Toppilife <info.lpa12toppilife.vn>',
-        to: 'toppilife.vn@gmail.com', //q.giang2508@gmail.com
+        to: process.env.GGMAIL_TO, //q.giang2508@gmail.com
         subject: 'Bạn có đơn hàng mới từ LPA12',
         dataMail: {
           // Take values from saved DB record instead of hard-code
