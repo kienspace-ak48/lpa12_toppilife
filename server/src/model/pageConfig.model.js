@@ -128,6 +128,14 @@ const pageConfigSchema = new mongoose.Schema({
     // Google metatag config fields
     gg_a: String,
     gg_wt: String,
+
+    // Meta Pixel config fields
+    fb_a: String,
+    fb_wt: String,
+
+    // ID-only tracking config
+    gtm_id: String,
+    fb_pixel_id: String,
   },
 }, {timestamps: true});
 

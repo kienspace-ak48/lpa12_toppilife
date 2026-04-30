@@ -1,46 +1,169 @@
 <style>
-    
-.animated-gradient {
-  font-size: 32px;
-  font-weight: 800;
-  background: linear-gradient(270deg, #6ee7b7, #60a5fa, #f472b6, #fbbf24);
-  background-size: 200% 200%;
-  -webkit-background-clip: text;
-  background-clip: text;
-  color: transparent;
-  animation: gradientMove 6s ease infinite;
-}
-
-@keyframes gradientMove {
-  0% { background-position: 0% 50%; }
-  50% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
-}
+  .kpi-grid { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 12px; }
+  .kpi-card { background: #fff; border: 1px solid #e5e7eb; border-radius: 12px; padding: 14px; }
+  .kpi-label { color: #6b7280; font-size: 12px; }
+  .kpi-value { font-size: 28px; font-weight: 700; margin-top: 4px; color: #111827; }
+  .quick-actions { display:grid; grid-template-columns: repeat(5,minmax(0,1fr)); gap:10px; margin:12px 0; }
+  .qa-item { display:block; text-align:center; background:#f8fafc; border:1px solid #e2e8f0; border-radius:10px; padding:10px; font-size:12px; color:#0f172a; font-weight:600; }
+  .qa-item:hover { background:#eef2ff; border-color:#c7d2fe; }
+  .chart-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px; }
+  .chart-card { background: #fff; border: 1px solid #e5e7eb; border-radius: 12px; padding: 12px; }
+  .chart-title { font-size: 14px; font-weight: 600; margin-bottom: 8px; color: #111827; }
+  .chart-wrap { height: 260px; }
+  .line-wrap { height: 320px; }
+  @media (max-width: 1100px) {
+    .kpi-grid { grid-template-columns: repeat(2, minmax(0,1fr)); }
+    .quick-actions { grid-template-columns: repeat(2,minmax(0,1fr)); }
+    .chart-grid { grid-template-columns: 1fr; }
+  }
 </style>
 
-<div class="my-card" style="height: 70vh">
-    <!-- <h1>Homepage</h1> -->
-    <h1 style="margin-top: 30px;">
-    Wellcome back: <span id="greeting" class="animated-gradient" style=" font-weight: 700;"></span>
-    </h1>
-    <div id="quote" style="opacity: 0.7; margin-top: 8px "></div>
+<%
+  const st = typeof stats !== "undefined" ? stats : {};
+  const statusMap = st.statusMap || { new: 0, processing: 0, completed: 0, cancelled: 0 };
+  const dailyOrders = st.dailyOrders || [];
+%>
 
-  <!--  -->
+<div style="min-height: 70vh;">
+  <h2 style="font-size: 24px; font-weight: 700; margin-bottom: 8px;">
+    Xin chào <%= (user && user.name) ? user.name : "Admin" %> 👋
+  </h2>
+  <div style="color:#6b7280; margin-bottom: 6px;">Tổng quản nhanh đúng theo nghiệp vụ: đơn hàng, feedback, media và tracking.</div>
+
+  <div class="kpi-grid">
+    <div class="kpi-card">
+      <div class="kpi-label">Tổng đơn hàng</div>
+      <div class="kpi-value"><%= st.totalOrders || 0 %></div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Đơn chờ xử lý (new + processing)</div>
+      <div class="kpi-value"><%= st.pendingOrders || 0 %></div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Media library</div>
+      <div class="kpi-value"><%= st.mediaImages || 0 %></div>
+      <div style="font-size:12px;color:#6b7280;"><%= st.mediaFolders || 0 %> folders</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Tracking setup</div>
+      <div class="kpi-value"><%= st.trackingReady ? "OK" : "Thiếu" %></div>
+      <div style="font-size:12px;color:#6b7280;">GTM / Pixel trong Customize</div>
+    </div>
+  </div>
+
+  <div class="quick-actions">
+    <a class="qa-item" href="/admin/orders?status=new">Đơn mới cần xử lý</a>
+    <a class="qa-item" href="/admin/orders?status=processing">Đơn đang xử lý</a>
+    <a class="qa-item" href="/admin/feedbacks">Quản lý feedback</a>
+    <a class="qa-item" href="/admin/page-config/customize-section">SEO / Tracking</a>
+  </div>
+
+  <div class="chart-grid">
+    <div class="chart-card">
+      <div class="chart-title">Theo trạng thái đơn hàng</div>
+      <div class="chart-wrap"><canvas id="orderStatusChart"></canvas></div>
+    </div>
+    <div class="chart-card">
+      <div class="chart-title">So sánh vận hành</div>
+      <div class="chart-wrap"><canvas id="kpiBarChart"></canvas></div>
+    </div>
+  </div>
+
+  <div class="chart-card" style="margin-top:12px;">
+    <div class="chart-title">Xu hướng đơn hàng (7 ngày gần nhất)</div>
+    <div class="line-wrap"><canvas id="dailyOrdersChart"></canvas></div>
+  </div>
 </div>
+
+<script src="/vendor/chart.js"></script>
 <script>
-   
-    const userName = '<%if(typeof user !== "undefined"){%> <%= user.name%> <%}%> %>'; 
+  const dashboardStats = <%- JSON.stringify({
+    totalOrders: st.totalOrders || 0,
+    todayOrders: st.todayOrders || 0,
+    pendingOrders: st.pendingOrders || 0,
+    cancelRate: st.cancelRate || 0,
+    totalFeedbacks: st.totalFeedbacks || 0,
+    completionRate: st.completionRate || 0,
+    mediaImages: st.mediaImages || 0,
+    statusMap,
+    dailyOrders,
+  }) %>;
 
-    const quotes = [
-        'Hôm nay là một cơ hội mới để bạn tỏa sáng!',
-        'Làm điều bạn có thể, với những gì bạn có.',
-        'Thành công bắt đầu từ một bước đi nhỏ.',
-        'Đừng ngừng cố gắng — những điều tốt đẹp đang đến!',
-        'Trên hành trình của bạn, luôn có ánh sáng phía trước.',
-    ];
+  const statusCtx = document.getElementById("orderStatusChart");
+  if (statusCtx && window.Chart) {
+    new Chart(statusCtx, {
+      type: "doughnut",
+      data: {
+        labels: ["Mới", "Đang xử lý", "Hoàn thành", "Đã hủy"],
+        datasets: [{
+          data: [
+            Number(dashboardStats.statusMap.new || 0),
+            Number(dashboardStats.statusMap.processing || 0),
+            Number(dashboardStats.statusMap.completed || 0),
+            Number(dashboardStats.statusMap.cancelled || 0),
+          ],
+          backgroundColor: ["#60a5fa", "#f59e0b", "#34d399", "#f87171"],
+          borderWidth: 0,
+        }],
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        cutout: "55%",
+        plugins: { legend: { position: "bottom" } },
+      },
+    });
+  }
 
-    const randomQuote = quotes[Math.floor(Math.random() * quotes.length)];
+  const kpiCtx = document.getElementById("kpiBarChart");
+  if (kpiCtx && window.Chart) {
+    new Chart(kpiCtx, {
+      type: "bar",
+      data: {
+        labels: ["Đơn hôm nay", "Đơn chờ xử lý", "Feedback", "Tỉ lệ hủy %"],
+        datasets: [{
+          data: [
+            Number(dashboardStats.todayOrders || 0),
+            Number(dashboardStats.pendingOrders || 0),
+            Number(dashboardStats.totalFeedbacks || 0),
+            Number(dashboardStats.cancelRate || 0),
+          ],
+          backgroundColor: ["#0ea5e9", "#f59e0b", "#8b5cf6", "#ef4444"],
+          borderRadius: 8,
+        }],
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: { y: { beginAtZero: true, ticks: { precision: 0 } } },
+      },
+    });
+  }
 
-    document.getElementById('greeting').innerText =`${userName} 👋 ` ;
-    document.getElementById('quote').innerText = randomQuote;
+  const dailyCtx = document.getElementById("dailyOrdersChart");
+  if (dailyCtx && window.Chart) {
+    new Chart(dailyCtx, {
+      type: "line",
+      data: {
+        labels: (dashboardStats.dailyOrders || []).map((d) => d.label),
+        datasets: [{
+          label: "Đơn hàng",
+          data: (dashboardStats.dailyOrders || []).map((d) => Number(d.count || 0)),
+          borderColor: "#4338ca",
+          backgroundColor: "rgba(67,56,202,0.12)",
+          pointBackgroundColor: "#4338ca",
+          borderWidth: 2,
+          fill: true,
+          tension: 0.35,
+        }],
+      },
+      options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: { y: { beginAtZero: true, ticks: { precision: 0 } } },
+      },
+    });
+  }
 </script>

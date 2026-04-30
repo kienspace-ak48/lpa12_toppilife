@@ -1248,110 +1248,70 @@ export default function App() {
       .catch(() => setFeedbackItems([]));
   }, []);
 
-  // Inject GG metatag snippets (gg_a -> head, gg_wt -> body) after page config is loaded.
+  // Inject tracking tags by ID from admin config (no raw snippet input needed).
   useEffect(() => {
     if (!pageData) return;
 
-    const headContainerId = "gg_a_snippet_container";
-    const bodyContainerId = "gg_wt_snippet_container";
+    const gtmHeadContainerId = "gtm_head_container";
+    const gtmBodyContainerId = "gtm_body_container";
+    const fbHeadContainerId = "fb_head_container";
+    const fbBodyContainerId = "fb_body_container";
 
     const removeInjected = () => {
-      document.getElementById(headContainerId)?.remove();
-      document.getElementById(bodyContainerId)?.remove();
+      document.getElementById(gtmHeadContainerId)?.remove();
+      document.getElementById(gtmBodyContainerId)?.remove();
+      document.getElementById(fbHeadContainerId)?.remove();
+      document.getElementById(fbBodyContainerId)?.remove();
     };
 
-    const isSkippable = (s: unknown) => {
-      const v = String(s ?? "").trim();
-      return !v || v === "--no--";
-    };
-
-    // Handle cases where snippet is stored as HTML-escaped text
-    const decodeSnippet = (s: string) => {
-      // Minimal decode common HTML entities
-      return s
-        .replaceAll("&lt;", "<")
-        .replaceAll("&gt;", ">")
-        .replaceAll("&quot;", '"')
-        .replaceAll("&#39;", "'")
-        .replaceAll("&amp;", "&");
-    };
-
-    const injectIntoHead = (snippet: string) => {
-      const head = document.head;
-      if (!head) return;
-
-      const decoded = decodeSnippet(snippet);
-
-      const container = document.createElement("div");
-      container.id = headContainerId;
-      container.dataset.ggMeta = "gg_a";
-
-      // If snippet is plain JS (no <script> tag), wrap it.
-      if (!decoded.includes("<script") && !decoded.includes("<noscript") && !decoded.includes("<iframe") && !decoded.includes("<")) {
-        const s = document.createElement("script");
-        s.text = decoded;
-        container.appendChild(s);
-      } else {
-        container.innerHTML = decoded;
-
-        // Replace script tags so they execute
-        container.querySelectorAll("script").forEach((oldScript) => {
-          const s = document.createElement("script");
-          Array.from(oldScript.attributes || []).forEach((attr) => {
-            s.setAttribute(attr.name, attr.value);
-          });
-          const src = (oldScript as HTMLScriptElement).src;
-          if (src) s.src = src;
-          else s.text = oldScript.textContent || "";
-          oldScript.replaceWith(s);
-        });
-      }
-
-      head.appendChild(container);
-    };
-
-    const injectIntoBody = (snippet: string) => {
-      const body = document.body;
-      if (!body) return;
-
-      const decoded = decodeSnippet(snippet);
-
-      const container = document.createElement("div");
-      container.id = bodyContainerId;
-      container.dataset.ggMeta = "gg_wt";
-
-      // If snippet is plain JS (no tags), wrap it.
-      if (!decoded.includes("<script") && !decoded.includes("<noscript") && !decoded.includes("<iframe") && !decoded.includes("<")) {
-        const s = document.createElement("script");
-        s.text = decoded;
-        container.appendChild(s);
-      } else {
-        container.innerHTML = decoded;
-
-        container.querySelectorAll("script").forEach((oldScript) => {
-          const s = document.createElement("script");
-          Array.from(oldScript.attributes || []).forEach((attr) => {
-            s.setAttribute(attr.name, attr.value);
-          });
-          const src = (oldScript as HTMLScriptElement).src;
-          if (src) s.src = src;
-          else s.text = oldScript.textContent || "";
-          oldScript.replaceWith(s);
-        });
-      }
-
-      // Put it at the beginning of body.
-      body.prepend(container);
-    };
+    const isValidGtmId = (v: unknown) => /^GTM-[A-Z0-9]+$/i.test(String(v ?? "").trim());
+    const isValidPixelId = (v: unknown) => /^\d+$/.test(String(v ?? "").trim());
 
     removeInjected();
 
-    const ggA = pageData?.customize?.gg_a;
-    const ggWT = pageData?.customize?.gg_wt;
+    const gtmId = String(pageData?.customize?.gtm_id || "").trim();
+    const pixelId = String(pageData?.customize?.fb_pixel_id || "").trim();
 
+    if (isValidGtmId(gtmId)) {
+      const gtmHead = document.createElement("div");
+      gtmHead.id = gtmHeadContainerId;
+      const gtmScript = document.createElement("script");
+      gtmScript.text = `(function(w,d,s,l,i){w[l]=w[l]||[];w[l].push({'gtm.start':
+new Date().getTime(),event:'gtm.js'});var f=d.getElementsByTagName(s)[0],
+j=d.createElement(s),dl=l!='dataLayer'?'&l='+l:'';j.async=true;j.src=
+'https://www.googletagmanager.com/gtm.js?id='+i+dl;f.parentNode.insertBefore(j,f);
+})(window,document,'script','dataLayer','${gtmId}');`;
+      gtmHead.appendChild(gtmScript);
+      document.head?.appendChild(gtmHead);
 
-    if (!isSkippable(ggA)) injectIntoHead(String(ggA));
-    if (!isSkippable(ggWT)) injectIntoBody(String(ggWT));
+      const gtmBody = document.createElement("div");
+      gtmBody.id = gtmBodyContainerId;
+      gtmBody.innerHTML = `<noscript><iframe src="https://www.googletagmanager.com/ns.html?id=${encodeURIComponent(gtmId)}" height="0" width="0" style="display:none;visibility:hidden"></iframe></noscript>`;
+      document.body?.prepend(gtmBody);
+    }
+
+    if (isValidPixelId(pixelId)) {
+      const fbHead = document.createElement("div");
+      fbHead.id = fbHeadContainerId;
+      const fbScript = document.createElement("script");
+      fbScript.text = `!function(f,b,e,v,n,t,s)
+{if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+n.queue=[];t=b.createElement(e);t.async=!0;
+t.src=v;s=b.getElementsByTagName(e)[0];
+s.parentNode.insertBefore(t,s)}(window, document,'script',
+'https://connect.facebook.net/en_US/fbevents.js');
+fbq('init', '${pixelId}');
+fbq('track', 'PageView');`;
+      fbHead.appendChild(fbScript);
+      document.head?.appendChild(fbHead);
+
+      const fbBody = document.createElement("div");
+      fbBody.id = fbBodyContainerId;
+      fbBody.innerHTML = `<noscript><img height="1" width="1" style="display:none" src="https://www.facebook.com/tr?id=${encodeURIComponent(pixelId)}&ev=PageView&noscript=1" /></noscript>`;
+      document.body?.prepend(fbBody);
+    }
 
     return removeInjected;
   }, [pageData]);

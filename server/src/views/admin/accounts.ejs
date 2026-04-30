@@ -1,0 +1,225 @@
+<div class="mb-4 flex items-center justify-between">
+  <h1 class="text-xl font-bold">Account management</h1>
+  <% if (canManageRoles) { %>
+    <button id="btnOpenCreate" class="px-4 py-2 bg-blue-600 text-white rounded-lg font-semibold shadow">
+      + Add account
+    </button>
+  <% } %>
+</div>
+
+<div class="overflow-x-auto border rounded-lg">
+  <table class="w-full text-sm">
+    <thead class="bg-gray-50">
+      <tr class="border-b">
+        <th class="p-3 text-left">Name</th>
+        <th class="p-3 text-left">Username</th>
+        <th class="p-3 text-left">Email</th>
+        <th class="p-3 text-left">Phone</th>
+        <th class="p-3 text-left">Role</th>
+        <th class="p-3 text-left">Status</th>
+        <th class="p-3 text-left">Created</th>
+        <% if (canManageRoles) { %><th class="p-3 text-left">Actions</th><% } %>
+      </tr>
+    </thead>
+    <tbody>
+      <% if (!users || users.length === 0) { %>
+        <tr><td colspan="8" class="p-4 text-center text-gray-500">No accounts found</td></tr>
+      <% } %>
+      <% (users || []).forEach(function(u){ %>
+        <tr
+          class="border-b hover:bg-gray-50"
+          data-id="<%= u._id %>"
+          data-name="<%= u.name || '' %>"
+          data-username="<%= u.username || '' %>"
+          data-email="<%= u.email || '' %>"
+          data-phone="<%= u.phone || '' %>"
+        >
+          <td class="p-3"><%= u.name || "" %></td>
+          <td class="p-3"><%= u.username || "" %></td>
+          <td class="p-3"><%= u.email || "" %></td>
+          <td class="p-3"><%= u.phone || "" %></td>
+          <td class="p-3">
+            <span class="px-2 py-1 rounded text-xs <%= u.role === 'super_admin' ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700' %>">
+              <%= u.role || "admin" %>
+            </span>
+          </td>
+          <td class="p-3">
+            <span class="px-2 py-1 rounded text-xs <%= u.status ? 'bg-emerald-100 text-emerald-700' : 'bg-red-100 text-red-700' %>">
+              <%= u.status ? "active" : "locked" %>
+            </span>
+          </td>
+          <td class="p-3"><%= new Date(u.createdAt).toLocaleString() %></td>
+          <% if (canManageRoles) { %>
+          <td class="p-3 space-x-2">
+            <button type="button" class="px-3 py-1 text-xs border rounded edit-btn">Edit</button>
+            <select class="border border-gray-300 rounded px-2 py-1 text-xs role-select">
+              <option value="admin" <%= u.role === "admin" ? "selected" : "" %>>admin</option>
+              <option value="super_admin" <%= u.role === "super_admin" ? "selected" : "" %>>super_admin</option>
+            </select>
+            <button type="button" class="px-3 py-1 text-xs border rounded update-role-btn">Update role</button>
+            <button type="button" class="px-3 py-1 text-xs border rounded lock-toggle-btn">
+              <%= u.status ? "Lock" : "Unlock" %>
+            </button>
+          </td>
+          <% } %>
+        </tr>
+      <% }) %>
+    </tbody>
+  </table>
+</div>
+
+<% if (canManageRoles) { %>
+<div id="editModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50 p-3">
+  <div class="bg-white rounded-xl shadow-lg w-[520px] max-w-[95vw] p-6">
+    <h2 class="text-lg font-bold mb-4">Edit account</h2>
+    <form id="editForm" class="grid grid-cols-1 md:grid-cols-2 gap-3">
+      <input type="hidden" name="id" />
+      <input name="name" placeholder="Name" class="px-3 py-2 border rounded" required />
+      <input name="username" placeholder="Username" class="px-3 py-2 border rounded" required />
+      <input name="email" type="email" placeholder="Email" class="px-3 py-2 border rounded md:col-span-2" required />
+      <input name="phone" placeholder="Phone" class="px-3 py-2 border rounded md:col-span-2" />
+      <input name="password" type="password" placeholder="New password (optional)" class="px-3 py-2 border rounded md:col-span-2" />
+      <div class="md:col-span-2 flex justify-end gap-2">
+        <button type="button" id="btnCloseEdit" class="px-4 py-2 border rounded">Cancel</button>
+        <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded">Save changes</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<div id="createModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-black/50 p-3">
+  <div class="bg-white rounded-xl shadow-lg w-[520px] max-w-[95vw] p-6">
+    <h2 class="text-lg font-bold mb-4">Create account</h2>
+    <form id="createForm" class="grid grid-cols-1 md:grid-cols-2 gap-3">
+      <input name="name" placeholder="Name" class="px-3 py-2 border rounded" required />
+      <input name="username" placeholder="Username" class="px-3 py-2 border rounded" required />
+      <input name="email" type="email" placeholder="Email" class="px-3 py-2 border rounded md:col-span-2" required />
+      <input name="phone" placeholder="Phone" class="px-3 py-2 border rounded" />
+      <select name="role" class="px-3 py-2 border rounded">
+        <option value="admin">admin</option>
+        <option value="super_admin">super_admin</option>
+      </select>
+      <input name="password" type="password" placeholder="Password" class="px-3 py-2 border rounded md:col-span-2" required />
+      <div class="md:col-span-2 flex justify-end gap-2">
+        <button type="button" id="btnCloseCreate" class="px-4 py-2 border rounded">Cancel</button>
+        <button type="submit" class="px-4 py-2 bg-blue-600 text-white rounded">Save</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+  const editModal = document.getElementById("editModal");
+  const editForm = document.getElementById("editForm");
+  const createModal = document.getElementById("createModal");
+  const createForm = document.getElementById("createForm");
+
+  function openEditModal(tr) {
+    editForm.querySelector('[name="id"]').value = tr.dataset.id || "";
+    editForm.querySelector('[name="name"]').value = tr.dataset.name || "";
+    editForm.querySelector('[name="username"]').value = tr.dataset.username || "";
+    editForm.querySelector('[name="email"]').value = tr.dataset.email || "";
+    editForm.querySelector('[name="phone"]').value = tr.dataset.phone || "";
+    editForm.querySelector('[name="password"]').value = "";
+    editModal.classList.remove("hidden");
+    editModal.classList.add("flex");
+  }
+
+  document.querySelectorAll(".edit-btn").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const tr = btn.closest("tr");
+      if (!tr) return;
+      openEditModal(tr);
+    });
+  });
+  document.getElementById("btnCloseEdit")?.addEventListener("click", () => {
+    editModal.classList.add("hidden");
+    editModal.classList.remove("flex");
+  });
+  editModal?.addEventListener("click", (e) => {
+    if (e.target === editModal) {
+      editModal.classList.add("hidden");
+      editModal.classList.remove("flex");
+    }
+  });
+
+  editForm?.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const id = editForm.querySelector('[name="id"]').value;
+    const payload = Object.fromEntries(new FormData(editForm).entries());
+    const res = await fetch(`/admin/accounts/${id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+    const data = await res.json();
+    if (!data.success) return alert(data.mess || "Update failed");
+    alert("Update account success");
+    window.location.reload();
+  });
+
+  document.getElementById("btnOpenCreate")?.addEventListener("click", () => {
+    createModal.classList.remove("hidden");
+    createModal.classList.add("flex");
+  });
+  document.getElementById("btnCloseCreate")?.addEventListener("click", () => {
+    createModal.classList.add("hidden");
+    createModal.classList.remove("flex");
+  });
+  createModal?.addEventListener("click", (e) => {
+    if (e.target === createModal) {
+      createModal.classList.add("hidden");
+      createModal.classList.remove("flex");
+    }
+  });
+
+  createForm?.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    const payload = Object.fromEntries(new FormData(createForm).entries());
+    const res = await fetch("/admin/accounts", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+    const data = await res.json();
+    if (!data.success) return alert(data.mess || "Create failed");
+    alert("Create account success");
+    window.location.reload();
+  });
+
+  document.querySelectorAll(".update-role-btn").forEach((btn) => {
+    btn.addEventListener("click", async () => {
+      const tr = btn.closest("tr");
+      const id = tr.dataset.id;
+      const role = tr.querySelector(".role-select")?.value || "admin";
+      const res = await fetch(`/admin/accounts/${id}/role`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ role }),
+      });
+      const data = await res.json();
+      if (!data.success) return alert(data.mess || "Update role failed");
+      alert("Update role success");
+      window.location.reload();
+    });
+  });
+
+  document.querySelectorAll(".lock-toggle-btn").forEach((btn) => {
+    btn.addEventListener("click", async () => {
+      const tr = btn.closest("tr");
+      const id = tr.dataset.id;
+      const current = btn.textContent.trim().toLowerCase() === "lock";
+      const nextStatus = !current;
+      const res = await fetch(`/admin/accounts/${id}/status`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: nextStatus }),
+      });
+      const data = await res.json();
+      if (!data.success) return alert(data.mess || "Update status failed");
+      alert("Update status success");
+      window.location.reload();
+    });
+  });
+</script>
+<% } %>

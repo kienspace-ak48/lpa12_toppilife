@@ -7,7 +7,8 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node src/server.js",
     "dev": "nodemon --inspect src/server.js",
-    "tw": "tailwindcss -i ./src/assets/index.css -o ./public/css/index.css --watch"
+    "tw": "tailwindcss -i ./src/assets/index.css -o ./public/css/index.css --watch",
+    "seed:test:orders": "node scripts/seed-test-orders.js"
   },
   "keywords": [],
   "author": "",
@@ -16,6 +17,7 @@
   "dependencies": {
     "@tailwindcss/cli": "^4.2.1",
     "bcrypt": "^6.0.0",
+    "chart.js": "^4.5.1",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.6",
     "dotenv": "^17.3.1",

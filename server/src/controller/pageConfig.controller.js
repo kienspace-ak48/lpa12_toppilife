@@ -16,7 +16,6 @@ const pageConfigController = () => {
     SaveAndUpdate: async (req, res) => {
       try {
         const data = req.body;
-        console.log(data);
         const pageconfigDTO = {
           hero: {
             badge: data.hero_badge,
@@ -125,9 +124,12 @@ const pageConfigController = () => {
             keywords: data.keywords,
             gg_a: data.gg_a || "--no--",
             gg_wt: data.gg_wt || "--no--",
+            fb_a: data.fb_a || "--no--",
+            fb_wt: data.fb_wt || "--no--",
+            gtm_id: (data.gtm_id || "").trim(),
+            fb_pixel_id: (data.fb_pixel_id || "").trim(),
           },
         };
-        console.log(cDTO);
         const task1 = await pageConfigService.AddAndUpdate(cDTO);
         // const task1 = true;
         if (!task1) {

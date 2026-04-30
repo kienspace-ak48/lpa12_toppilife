@@ -30,6 +30,9 @@ app.set('layout', 'layout/main');//file layout default
 app.use(cors())
 // serve static React
 app.use(express.static(myPathConfig.public));
+app.get("/vendor/chart.js", (req, res) => {
+  return res.sendFile(path.join(myPathConfig.root, "node_modules/chart.js/dist/chart.umd.js"));
+});
 app.use(response);
 
 // router

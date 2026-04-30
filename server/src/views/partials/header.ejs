@@ -8,7 +8,7 @@
       <i class="fa-solid fa-bars"></i>
     </button>
     <!-- Logo -->
-    <div class="text-xl font-bold text-blue-600 tracking-wide">AdminPanel</div>
+    <div class="text-xl font-bold text-blue-600 tracking-wide">LPA12 panel</div>
   </div>
 
   <!-- Center (search) -->
@@ -37,17 +37,23 @@
       >
     </button>
     <!-- user profile -->
-    <div
-      class="relative flex items-center gap-3 cursor-pointer hover:bg-gray-200 px-2 py-1 rounded-lg transition group"
-    >
-      <!-- <img src="" alt="" /> -->
-       <i class="fa-solid fa-user-shield"></i>
-      <div class="hidden md:block leading-light">
-        <p class="text-sm font-medium">Admin</p>
-        <p class="text-xs text-gray-500">Supper Admin</p>
-      </div>
-      <!-- z-index -->
-      <div class="absolute top-full right-0 bg-white shadow-md rounded-lg p-2 z-50 hidden group-hover:block">
+    <div class="relative">
+      <button
+        id="accountMenuBtn"
+        type="button"
+        class="flex items-center gap-3 cursor-pointer hover:bg-gray-200 px-2 py-1 rounded-lg transition"
+      >
+        <i class="fa-solid fa-user-shield"></i>
+        <div class="hidden md:block leading-light text-left">
+          <p class="text-sm font-medium">Admin</p>
+          <p class="text-xs text-gray-500">Supper Admin</p>
+        </div>
+        <i class="fa-solid fa-chevron-down text-xs text-gray-500"></i>
+      </button>
+      <div
+        id="accountMenuDropdown"
+        class="absolute top-full right-0 mt-2 min-w-[150px] bg-white shadow-md rounded-lg p-2 z-50 hidden border border-gray-200"
+      >
         <!-- <a href="/admin/profile" class="block px-3 py-2 text-sm rounded-lg hover:bg-gray-100 transition">
           <span class="menu-text">Profile</span>
         </a> -->
@@ -60,3 +66,25 @@
     </div>
   </div>
 </header>
+<script>
+  (function initAccountMenu() {
+    const btn = document.getElementById("accountMenuBtn");
+    const menu = document.getElementById("accountMenuDropdown");
+    if (!btn || !menu) return;
+
+    btn.addEventListener("click", function (e) {
+      e.stopPropagation();
+      menu.classList.toggle("hidden");
+    });
+
+    document.addEventListener("click", function (e) {
+      if (!menu.contains(e.target) && !btn.contains(e.target)) {
+        menu.classList.add("hidden");
+      }
+    });
+
+    window.addEventListener("resize", function () {
+      menu.classList.add("hidden");
+    });
+  })();
+</script>
