@@ -19,6 +19,18 @@ app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(cookieParser());
 
+// Bust browser/CDN cache for compiled Tailwind after `npm run tw` (mtime changes)
+app.use((req, res, next) => {
+  try {
+    res.locals.cssVersion = fs.statSync(
+      path.join(myPathConfig.public, "css/index.css"),
+    ).mtimeMs;
+  } catch {
+    res.locals.cssVersion = 0;
+  }
+  next();
+});
+
 //view engine EJS
 app.set('view engine', 'ejs');
 app.set('views', path.join(myPathConfig.root, 'src/views'));
@@ -28,6 +40,15 @@ app.set('layout', 'layout/main');//file layout default
 
 //
 app.use(cors())
+
+app.get("/css/index.css", (req, res, next) => {
+  res.set("Cache-Control", "no-store, no-cache, must-revalidate");
+  res.type("text/css");
+  res.sendFile(path.join(myPathConfig.public, "css/index.css"), (err) => {
+    if (err) next(err);
+  });
+});
+
 // serve static React
 app.use(express.static(myPathConfig.public));
 app.get("/vendor/chart.js", (req, res) => {
@@ -58,6 +79,7 @@ app.get('/api/landing', async(req, res)=>{
     console.error('loi entry point')
   }
 })
+
 // const html = fs.readFile(myPathConfig.public+"index.html");
 // console.log(html);
 app.use(async (req, res) => {

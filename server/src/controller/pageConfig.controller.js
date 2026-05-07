@@ -16,14 +16,15 @@ const pageConfigController = () => {
     SaveAndUpdate: async (req, res) => {
       try {
         const data = req.body;
+        const heroPath = String(data.hero_media_url || data.hero_img_url || "").trim();
         const pageconfigDTO = {
           hero: {
             badge: data.hero_badge,
             title: data.hero_title,
             desc: data.hero_desc,
             media_type: data.hero_media_type || "image",
-            media_url: data.hero_media_url,
-            img_url: data.hero_img_url,
+            media_url: heroPath,
+            img_url: heroPath,
             benefits: data.hero_benefits,
           },
           purchase_frame: {

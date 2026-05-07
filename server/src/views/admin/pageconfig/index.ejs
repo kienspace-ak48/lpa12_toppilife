@@ -1,6 +1,30 @@
-<script defer src="/js/imagePicker.module.js"></script>
 <script defer src="/js/pageconfig.js"></script>
+<script defer src="/js/admin-media-picker.js"></script>
 <form id="configForm">
+  <style>
+    /* Ẩn ô đường dẫn nhưng vẫn submit & picker vẫn ghi được giá trị */
+    #configForm .image_action input.img_input {
+      clip: rect(0, 0, 0, 0);
+      clip-path: inset(50%);
+      height: 1px;
+      width: 1px;
+      overflow: hidden;
+      position: absolute;
+      left: 0;
+      bottom: 0;
+      white-space: nowrap;
+      padding: 0;
+      margin: 0;
+      border: 0;
+    }
+    #configForm .image_action {
+      position: relative;
+    }
+  </style>
+  <p class="text-sm text-gray-500 border border-dashed border-gray-200 rounded-lg px-3 py-2 bg-gray-50">
+    Ảnh / GIF / video: nhập đường dẫn trong <code>public</code> hoặc bấm <strong>Chọn media</strong> để lấy từ
+    <a href="/admin/media" target="_blank" class="text-blue-600 underline">Media Library</a>.
+  </p>
   <div class="space-y-4">
 <!-- =========== action =========== -->
 <div class="flex justify-between items-center">
@@ -43,70 +67,45 @@
       placeholder="Description"
       class="border w-full px-3 py-2 rounded"
     ><%=pc?.hero?.desc ||''%></textarea>
-    <!-- hero media type -->
-    <h4 class="font-semibold pt-3">Hero Media(1000x1000)</h4>
+    <!-- hero media -->
+    <h4 class="font-semibold pt-3">Hero media</h4>
     <div class="grid grid-cols-1 md:grid-cols-2 gap-3 mt-2">
       <select name="hero_media_type" class="border w-full px-3 py-2 rounded">
         <option value="image" <%= (pc?.hero?.media_type || "image") === "image" ? "selected" : "" %>>Image</option>
         <option value="gif" <%= (pc?.hero?.media_type || "image") === "gif" ? "selected" : "" %>>GIF</option>
         <option value="video" <%= (pc?.hero?.media_type || "image") === "video" ? "selected" : "" %>>Video</option>
       </select>
-      <input
-        type="text"
-        name="hero_media_url"
-        value="<%=pc?.hero?.media_url||''%>"
-        class="w-full px-4 py-3 border border-gray-300 rounded-lg hidden"
-        placeholder="hero media path"
-      />
     </div>
-
-    <!-- <input
-      name="hero_img_url"
-      value="<%#=pc?.hero?.img_url||''%>"
-      placeholder="Image URL"
-      class="border w-full px-3 py-2 rounded"
-    /> -->
-    <!--  -->
-    <!-- image handle action -->
-<div class="image_action hero_media_action">
-  <!-- <label for="">Image banner</label> -->
-  <div class="flex gap-2 items-center mt-3">
-    <button
-      type="button"
-      class="flex-1 px-4 py-3 chooseHeroImage rounded-lg border border-green-500"
-    >
-      Chọn ảnh/GIF
-    </button>
-    <button
-      type="button"
-      class="flex-1 px-4 py-3 chooseHeroVideo rounded-lg border border-blue-500"
-    >
-      Chọn video
-    </button>
-    <input
-      type="text"
-      name="hero_img_url"
-      value="<%=pc?.hero?.img_url||''%>"
-      class="flex-3 img_input w-full px-4 py-3 border border-gray-300 rounded-lg hidden"
-      placeholder="img"
-    />
-  </div>
-  <div class="img_preview border border-gray-300 w-full h-[200px] flex items-center justify-center overflow-hidden">
+    <div class="image_action mt-2">
+      <div class="flex flex-col gap-2 sm:flex-row sm:items-stretch">
+        <button
+          type="button"
+          class="chooseImg shrink-0 px-4 py-2 rounded-lg border border-green-600 bg-green-50 font-semibold text-green-800 hover:bg-green-100"
+        >
+          Chọn media
+        </button>
+        <input
+          type="text"
+          name="hero_media_url"
+          value="<%= pc?.hero?.media_url || pc?.hero?.img_url || '' %>"
+          class="img_input border w-full px-3 py-2 rounded flex-1"
+          placeholder="uploads/... (ảnh, gif hoặc video trong public)"
+        />
+      </div>
+      <div class="img_preview hero_media_action border border-gray-300 w-full h-[200px] flex items-center justify-center overflow-hidden mt-2 bg-gray-50">
     <%
       const heroType = pc?.hero?.media_type || "image";
       const heroMedia = pc?.hero?.media_url || pc?.hero?.img_url || "";
     %>
     <% if (heroType === "video" && heroMedia) { %>
       <video src="/<%=heroMedia%>" class="w-full h-full object-cover" controls muted playsinline></video>
+    <% } else if (heroMedia) { %>
+      <img src="/<%=heroMedia%>" alt="" class="w-full object-cover max-h-[200px]" />
     <% } else { %>
-      <img
-        src="/<%=heroMedia%>"
-        alt=""
-        class="w-full object-cover max-h-[200px]"
-      />
+      <span class="text-sm text-gray-400">Preview</span>
     <% } %>
-  </div>
-</div>
+      </div>
+    </div>
     <!--  -->
     <textarea name="hero_benefits" id="hero_benefits"  class=" w-full px-3 py-2 border border-gray-300 rounded-lg" placeholder="Enter = 1 sentence"><%=pc?.hero?.benefits.join("\n")%></textarea>
 
@@ -185,13 +184,13 @@
     type="button"
       class="flex-1 px-4 py-3 chooseImg rounded-lg border border-green-500"
     >
-      Chọn ảnh
+      Chọn media
     </button>
     <input
       type="text"
       name="purchase_img_url"
       value="<%=pc?.purchase_frame?.img_url||''%>"
-      class="flex-3 img_input w-full px-4 py-3 border border-gray-300 rounded-lg hidden"
+      class="img_input w-full px-4 py-3 border border-gray-300 rounded-lg text-sm mt-2"
       placeholder="img"
     />
   </div>
@@ -316,12 +315,13 @@
           type="button"
           class="chooseImg border px-4 py-2 rounded"
         >
-          Chọn ảnh
+          Chọn media
         </button>
         <input
         name="img_url"
         value="<%= card?.img_url || '' %>"
-        class="img_input hidden"
+        class="img_input border w-full px-3 py-2 rounded text-sm mt-2"
+        placeholder="uploads/..."
       />
 
         <div class="img_preview border mt-2 h-[150px]">
@@ -412,18 +412,40 @@
         <%pc.feedback.list.forEach(f=>{%>
           <div class="instance relative border border-gray-300 p-2">
             <span class="remove-instance w-5 h-5 rounded-lg bg-red-500 text-white font-bold hover:cursor-pointer hover:scale-120 flex items-center justify-center absolute -top-2 right-1">X</span>
+            <div class="image_action mb-2">
+              <button
+                type="button"
+                class="chooseImg w-full px-4 py-2 rounded-lg border border-green-600 bg-green-50 text-sm font-semibold text-green-800 hover:bg-green-100"
+              >
+                Chọn media (avatar)
+              </button>
+              <input
+                type="text"
+                _feedback_img_url=""
+                value="<%= f.img_url || '' %>"
+                class="img_input border w-full px-3 py-2 rounded text-sm mt-1"
+                placeholder=""
+              />
+              <div class="img_preview border border-gray-300 w-full h-[120px] mt-2 overflow-hidden bg-gray-50 flex items-center justify-center">
+                <% if (f.img_url) { %>
+                  <img src="/<%= f.img_url %>" alt="" class="w-full h-full object-cover" />
+                <% } else { %>
+                  <span class="text-xs text-gray-400">Chưa chọn ảnh</span>
+                <% } %>
+              </div>
+            </div>
             <div>
               <div class="flex">
                 <input lable="" value="<%=f.title%>" type="text" class="px-3 py-2 rounded-lg border border-gray-300  w-full" placeholder="title">
                 <input star="" value="<%=f.star%>" type="number" class="px-3 py-2 rounded-lg border border-gray-300  w-full" placeholder="star">
               </div>
-              <textarea desc="" name="" id="" class="px-3 py-2 rounded-lg border border-gray-300 w-full" placeholder="comment"><%=f.desc%></textarea>
-              <!-- <input type="text" class="px-3 py-2 rounded-lg border border-gray-300  w-full" placeholder="title"> -->
+              <textarea desc="" name="" id="" class="px-3 py-2 rounded-lg border border-gray-300 w-full mt-2" placeholder="comment"><%=f.desc%></textarea>
             </div>
           </div>
         <%})%>
       <%}%>
     </div>
+  </div>
 </section>
 <!-- =============== Teachnology ============ -->
  <section class="border border-gray-300 rounded-lg">
@@ -460,13 +482,13 @@
                   type="button"
                   class="flex-1 px-4 py-3 chooseImg rounded-lg border border-green-500"
                 >
-                  Chọn ảnh
+                  Chọn media
                 </button>
                 <input
                   type="text"
                   value="<%=t.img_url%>"
                   _img_url=""
-                  class=" flex-3 img_input w-full px-4 py-3 border border-gray-300 rounded-lg hidden"
+                  class="img_input w-full px-4 py-3 border border-gray-300 rounded-lg text-sm mt-2"
                   placeholder="img"
                 />
               </div>
@@ -519,13 +541,13 @@
                     type="button"
                     class="flex-1 px-4 py-3 chooseImg rounded-lg border border-green-500"
                   >
-                    Chọn ảnh
+                    Chọn media
                   </button>
                   <input
                     type="text"
                     _img_url
                     value="<%=f.img_url%>"
-                    class=" flex-3 img_input w-full px-4 py-3 border border-gray-300 rounded-lg hidden"
+                    class="img_input w-full px-4 py-3 border border-gray-300 rounded-lg text-sm mt-2"
                     placeholder="img"
                   />
                 </div>
@@ -566,13 +588,13 @@
           type="button"
           class="flex-1 px-4 py-3 chooseImg rounded-lg border border-green-500"
         >
-          Chọn ảnh
+          Chọn media
         </button>
         <input
           type="text"
           value="<%=pc?.box_content?.img_url%>"
           name="box_content_img_url"
-          class=" flex-3 img_input w-full px-4 py-3 border border-gray-300 rounded-lg hidden"
+          class="img_input w-full px-4 py-3 border border-gray-300 rounded-lg text-sm mt-2"
           placeholder="img"
         />
       </div>
@@ -618,13 +640,13 @@
                   type="button"
                   class="flex-1 px-4 py-3 chooseImg rounded-lg border border-green-500"
                 >
-                  Chọn ảnh
+                  Chọn media
                 </button>
                 <input
                   type="text"
                   value="<%=i.img_url%>"
                   _img_url
-                  class=" flex-3 img_input w-full px-4 py-3 border border-gray-300 rounded-lg hidden"
+                  class="img_input w-full px-4 py-3 border border-gray-300 rounded-lg text-sm mt-2"
                   placeholder="img"
                 />
               </div>
@@ -679,13 +701,13 @@
                   type="button"
                   class="flex-1 px-4 py-3 chooseImg rounded-lg border border-green-500"
                 >
-                  Chọn ảnh
+                  Chọn media
                 </button>
                 <input
                   type="text"
                   value="<%=i.img_url%>"
                   _img_url
-                  class=" flex-3 img_input w-full px-4 py-3 border border-gray-300 rounded-lg hidden"
+                  class="img_input w-full px-4 py-3 border border-gray-300 rounded-lg text-sm mt-2"
                   placeholder="img"
                 />
               </div>
@@ -739,12 +761,12 @@
             type="button"
             class="flex-1 px-4 py-3 chooseImg rounded-lg border border-green-500"
           >
-            Chọn ảnh
+            Chọn media
           </button>
           <input
             type="text"
             _img_url
-            class=" flex-3 img_input w-full px-4 py-3 border border-gray-300 rounded-lg hidden"
+            class="img_input w-full px-4 py-3 border border-gray-300 rounded-lg text-sm mt-2"
             placeholder="img"
           />
         </div>
@@ -800,12 +822,12 @@
             type="button"
             class="flex-1 px-4 py-3 chooseImg rounded-lg border border-green-500"
           >
-            Chọn ảnh
+            Chọn media
           </button>
           <input
             type="text"
             _img_url
-            class=" flex-3 img_input w-full px-4 py-3 border border-gray-300 rounded-lg hidden"
+            class="img_input w-full px-4 py-3 border border-gray-300 rounded-lg text-sm mt-2"
             placeholder="img"
           />
         </div>
@@ -832,12 +854,12 @@
           type="button"
           class="flex-1 px-4 py-3 chooseImg rounded-lg border border-green-500"
         >
-          Chọn ảnh
+          Chọn media
         </button>
         <input
           type="text"
           _img_url=""
-          class=" flex-3 img_input w-full px-4 py-3 border border-gray-300 rounded-lg hidden"
+          class="img_input w-full px-4 py-3 border border-gray-300 rounded-lg text-sm mt-2"
           placeholder="img"
         />
       </div>
@@ -869,12 +891,12 @@
           type="button"
           class="flex-1 px-4 py-3 chooseImg rounded-lg border border-green-500"
         >
-          Chọn ảnh
+          Chọn media
         </button>
         <input
           type="text"
           _img_url=""
-          class=" flex-3 img_input w-full px-4 py-3 border border-gray-300 rounded-lg hidden"
+          class="img_input w-full px-4 py-3 border border-gray-300 rounded-lg text-sm mt-2"
           placeholder="img"
         />
       </div>
@@ -908,13 +930,30 @@
  <template id="feedback_template">
   <div class="instance relative border border-gray-300 p-2">
     <span class="remove-instance w-5 h-5 rounded-lg bg-red-500 text-white font-bold hover:cursor-pointer hover:scale-120 flex items-center justify-center absolute -top-2 right-1">X</span>
+    <div class="image_action mb-2">
+      <button
+        type="button"
+        class="chooseImg w-full px-4 py-2 rounded-lg border border-green-600 bg-green-50 text-sm font-semibold text-green-800 hover:bg-green-100"
+      >
+        Chọn media (avatar)
+      </button>
+      <input
+        type="text"
+        _feedback_img_url=""
+        value=""
+        class="img_input border w-full px-3 py-2 rounded text-sm mt-1"
+        placeholder=""
+      />
+      <div class="img_preview border border-gray-300 w-full h-[120px] mt-2 overflow-hidden bg-gray-50 flex items-center justify-center">
+        <span class="text-xs text-gray-400">Chưa chọn ảnh</span>
+      </div>
+    </div>
     <div>
       <div class="flex">
         <input lable="" type="text" class="px-3 py-2 rounded-lg border border-gray-300  w-full" placeholder="title">
         <input star="" type="number" class="px-3 py-2 rounded-lg border border-gray-300  w-full" placeholder="star">
       </div>
-      <textarea desc="" name="" id="" class="px-3 py-2 rounded-lg border border-gray-300 w-full" placeholder="commenment"></textarea>
-      <!-- <input type="text" class="px-3 py-2 rounded-lg border border-gray-300  w-full" placeholder="title"> -->
+      <textarea desc="" name="" id="" class="px-3 py-2 rounded-lg border border-gray-300 w-full mt-2" placeholder="comment"></textarea>
     </div>
   </div>
  </template>
@@ -937,9 +976,9 @@
         type="button"
           class="flex-1 px-4 py-3 chooseImg rounded-lg border border-green-500"
         >
-          Chọn ảnh
+          Chọn media
         </button>
-    <input name="img_url" class="img_input hidden">
+    <input name="img_url" class="img_input w-full border px-3 py-2 rounded text-sm mt-2" placeholder="uploads/...">
       <div class="img_preview border mt-2 h-[150px]">
         <img src="" class="w-full h-full object-cover">
       </div>
@@ -962,21 +1001,6 @@
 
 </template>
 
-<!-- =================MODAL===================== -->
-<div
-  id="gallery_modal"
-  class="fixed inset-0 bg-black/50 items-center hidden justify-center"
->
-  <div class="bg-white min-w-75 max-h-[80vh] rounded p-4 overflow-y-auto">
-    <div class="header flex justify-between mb-4">
-      <h2>Chon anh</h2>
-      <button onclick="closeChooseImgModal()">X</button>
-    </div>
-    <!--  -->
-    <div id="imgList" class="grid grid-cols-4 gap-4"></div>
-  </div>
-</div>
-<!-- //===================== -->
  <script>
   // ================ body area ============== //
   const bodyAreaTemplate = document.querySelector('#body_area_template');

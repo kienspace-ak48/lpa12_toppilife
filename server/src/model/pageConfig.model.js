@@ -51,6 +51,7 @@ const pageConfigSchema = new mongoose.Schema({
       title: String,
       desc: String,
       star: Number,
+      img_url: String,
       _id: false
   }]
   },

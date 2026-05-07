@@ -13,7 +13,7 @@ function noStore(req, res, next) {
 function routes(app) {
   app.use('/api', apiRoute)
   app.use('/auth', authRoute)
-  app.use("/admin", noStore, authMiddleware, adminRoute);
+  app.use("/admin", authMiddleware, adminRoute);
 }
 
 module.exports = routes;

@@ -8,6 +8,7 @@ document.querySelectorAll("section > div").forEach((el) => {
 //
 document.addEventListener("DOMContentLoaded", () => {
   const form = document.querySelector("#configForm");
+  if (!form) return;
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
     const formData = new FormData(form);
@@ -80,6 +81,7 @@ document.addEventListener("DOMContentLoaded", () => {
         title: el.querySelector('[lable]').value.trim(),
         desc: el.querySelector('[desc]').value.trim(),
         star: Number(el.querySelector('[star]').value),
+        img_url: (el.querySelector("[_feedback_img_url]")?.value || "").trim(),
       }
       feedbackArr.push(fb);
     })
@@ -146,10 +148,6 @@ document.addEventListener("DOMContentLoaded", () => {
         .map((i) => i.trim())
         .filter((i) => i !== "");
     }
-    if (!data.hero_media_url && data.hero_img_url) {
-      // Backward compatibility for old records using hero_img_url only.
-      data.hero_media_url = data.hero_img_url;
-    }
     //convert textarea -> array
 
     console.log(data);
@@ -175,57 +173,18 @@ document.addEventListener("DOMContentLoaded", () => {
 // ------------------ target audience ------------------- //
 const targetWrapper = document.querySelector("#target_audience_wrapper");
 const targetTemplate = document.querySelector("#target_audience_template");
+const ctaAddTarget = document.querySelector("#cta_add_target_card");
 
-document.querySelector("#cta_add_target_card").addEventListener("click", () => {
-  const clone = targetTemplate.content.cloneNode(true);
-  targetWrapper.appendChild(clone);
-});
-
-targetWrapper.addEventListener("click", (ev) => {
-  if (ev.target.classList.contains("remove-instance")) {
-    const instance = ev.target.closest(".instance");
-    instance.remove();
-  }
-});
-
-if (window.ImagePicker) {
-  window.ImagePicker.initImagePicker({
-    triggerSelector: ".chooseImg",
-    onSelect: (src, triggerEl) => {
-      const root = triggerEl?.closest(".image_action");
-      if (!root) return;
-      const input = root.querySelector(".img_input");
-      const preview = root.querySelector(".img_preview img");
-      if (input) input.value = src;
-      if (preview) preview.src = "/" + src;
-    },
+if (targetWrapper && targetTemplate && ctaAddTarget) {
+  ctaAddTarget.addEventListener("click", () => {
+    const clone = targetTemplate.content.cloneNode(true);
+    targetWrapper.appendChild(clone);
   });
 
-  const setHeroPreview = (path, mediaType) => {
-    const root = document.querySelector(".hero_media_action");
-    if (!root) return;
-    const mediaUrlInput = document.querySelector('[name="hero_media_url"]');
-    const mediaTypeInput = document.querySelector('[name="hero_media_type"]');
-    if (mediaUrlInput) mediaUrlInput.value = path;
-    if (mediaTypeInput) mediaTypeInput.value = mediaType;
-
-    const previewWrap = root.querySelector(".img_preview");
-    if (!previewWrap) return;
-    previewWrap.innerHTML =
-      mediaType === "video"
-        ? `<video src="/${path}" class="w-full h-full object-cover" controls muted playsinline></video>`
-        : `<img src="/${path}" class="w-full object-cover max-h-[200px]" />`;
-  };
-
-  window.ImagePicker.initImagePicker({
-    triggerSelector: ".chooseHeroImage",
-    mediaType: "image",
-    onSelect: (src) => setHeroPreview(src, "image"),
-  });
-
-  window.ImagePicker.initImagePicker({
-    triggerSelector: ".chooseHeroVideo",
-    mediaType: "video",
-    onSelect: (src) => setHeroPreview(src, "video"),
+  targetWrapper.addEventListener("click", (ev) => {
+    if (ev.target.classList.contains("remove-instance")) {
+      const instance = ev.target.closest(".instance");
+      instance.remove();
+    }
   });
 }

@@ -1,3 +1,23 @@
+<script defer src="/js/admin-media-picker.js"></script>
+<style>
+  #pageinfo .image_action input.img_input {
+    clip: rect(0, 0, 0, 0);
+    clip-path: inset(50%);
+    height: 1px;
+    width: 1px;
+    overflow: hidden;
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    white-space: nowrap;
+    padding: 0;
+    margin: 0;
+    border: 0;
+  }
+  #pageinfo .image_action {
+    position: relative;
+  }
+</style>
 <div class="flex justify-between items-center">
   <h2 class="font-bold">
     Customize section/ Tùy chỉnh cấu hình web
@@ -185,24 +205,21 @@
 
       <div class="py-2">
         <label class="font-medium">OpenGraph image</label>
-        <!-- image handle action -->
-        <div class="image_action">
-          <!-- <label for="">Image banner</label> -->
-          <div class="flex justify-between items-center">
-            <button
-              class="flex-1 px-3 py-2 chooseImg rounded-lg border border-green-500"
-            >
-              Chọn ảnh
-            </button>
-            <input
-              type="text"
-              name="website_img"
-              value="<%=data?.customize?.img||''%>"
-              class="flex-3 img_input w-full px-4 py-3 border border-gray-300 rounded-lg hidden"
-              placeholder="img"
-            />
-          </div>
-          <div class="img_preview border border-gray-300 w-full h-[200px]">
+        <div class="image_action mt-2 space-y-2">
+          <button
+            type="button"
+            class="chooseImg px-4 py-2 rounded-lg border border-green-600 bg-green-50 text-sm font-semibold text-green-800 hover:bg-green-100"
+          >
+            Chọn media
+          </button>
+          <input
+            type="text"
+            name="website_img"
+            value="<%=data?.customize?.img||''%>"
+            class="img_input w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
+            placeholder="uploads/... (đường dẫn trong public)"
+          />
+          <div class="img_preview border border-gray-300 w-full h-[200px] flex items-center justify-center bg-gray-50 overflow-hidden">
             <img
               src="/<%=data?.customize?.img||''%>"
               alt=""
@@ -210,28 +227,11 @@
             />
           </div>
         </div>
-        <!--  -->
       </div>
     </div>
   </div>
 </section>
-<script src="/js/imagePicker.module.js"></script>
-<!-- =============SCRIPT=============== -->
 <script>
-  if (window.ImagePicker) {
-    window.ImagePicker.initImagePicker({
-      triggerSelector: ".chooseImg",
-      onSelect: (src, triggerEl) => {
-        const root = triggerEl?.closest(".image_action");
-        if (!root) return;
-        const input = root.querySelector(".img_input");
-        const preview = root.querySelector(".img_preview img");
-        if (input) input.value = src;
-        if (preview) preview.src = "/" + src;
-      },
-    });
-  }
-
   document.getElementById("btn_cta_save_config").addEventListener("click", async () => {
     const data = {
       pageinfo_email: document.querySelector("[name='pageinfo_email']").value,

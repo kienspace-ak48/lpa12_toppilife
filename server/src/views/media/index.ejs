@@ -1,0 +1,386 @@
+<div class="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+  <!-- Header -->
+  <div class="flex flex-col gap-6 border-b border-slate-100 px-6 py-6 lg:flex-row lg:items-center lg:justify-between lg:gap-8">
+    <div class="min-w-0">
+      <div class="mb-1 text-[11px] font-bold uppercase tracking-wider text-indigo-600">
+        Media Library
+      </div>
+      <h1 class="mb-1 text-2xl font-bold tracking-tight text-slate-800">Gallery / Thư viện ảnh</h1>
+      <p class="text-sm text-gray-500">
+        File ảnh nên đặt tên không dấu, dùng dấu "_" giữa các từ.
+      </p>
+    </div>
+    <div class="flex flex-shrink-0 flex-col gap-3 sm:flex-row sm:flex-wrap sm:items-center sm:justify-end">
+      <button
+        id="openModal"
+        type="button"
+        class="inline-flex items-center justify-center gap-2 rounded-lg border border-indigo-300 bg-white px-4 py-2.5 text-sm font-semibold text-indigo-600 shadow-sm hover:bg-indigo-50"
+      >
+        <i class="fa-solid fa-folder-plus text-indigo-500"></i>
+        Add folder
+      </button>
+      <input
+        type="file"
+        id="uploadInput"
+        accept="image/*,video/*"
+        class="block min-w-[200px] flex-1 cursor-pointer rounded-lg border border-slate-300 bg-white text-sm text-slate-700 shadow-sm file:mr-3 file:rounded-md file:border-0 file:bg-slate-100 file:px-4 file:py-2.5 file:text-sm file:font-semibold file:text-slate-700 hover:file:bg-slate-200 sm:max-w-[260px]"
+      />
+      <button
+        id="btnUpload"
+        type="button"
+        class="inline-flex flex-col items-center justify-center rounded-xl bg-indigo-600 px-8 py-3 text-white shadow-md transition-colors hover:bg-indigo-700"
+      >
+        <i class="fa-solid fa-upload mb-1 text-xl"></i>
+        <span class="text-sm font-semibold leading-tight">Upload</span>
+        <span class="mt-0.5 text-[11px] font-medium text-indigo-200">(Ảnh/video, tối đa ~120MB)</span>
+      </button>
+    </div>
+  </div>
+
+  <!-- Folders (tree): root sát trái, con thụt vào phải -->
+  <div class="border-b border-slate-100 px-6 py-5">
+    <div id="folder_tree" class="max-w-xl select-none text-sm">
+      <div
+        data-folder="all"
+        class="folder-item root flex w-full cursor-pointer items-center gap-2 rounded-xl bg-purple-100 px-2 py-2.5 font-bold text-indigo-800 shadow-sm ring-1 ring-purple-200/70 transition-colors sm:px-3"
+      >
+        <i class="fa-solid fa-folder shrink-0 text-amber-500"></i>
+        <span>Tất cả</span>
+      </div>
+
+      <% if (folders.length) { %>
+      <div class="relative mt-2 ml-6 flex flex-col gap-0.5 border-l border-gray-200 py-1 pl-4">
+        <% folders.forEach(folder => { %>
+        <div
+          data-folder="<%= folder._id %>"
+          class="folder-item child relative flex cursor-pointer items-center justify-between gap-3 rounded-lg py-2 pl-2 pr-1 text-gray-700 transition-colors hover:bg-slate-50"
+        >
+          <span
+            aria-hidden="true"
+            class="pointer-events-none absolute left-0 top-1/2 z-0 h-px w-3 -translate-x-full -translate-y-1/2 bg-gray-200"
+          ></span>
+          <span class="relative z-10 flex min-w-0 flex-1 items-center gap-2.5">
+            <i class="fa-solid fa-folder-open shrink-0 text-amber-500"></i>
+            <span class="truncate font-medium"><%= folder.name %></span>
+          </span>
+          <i
+            data-del="<%= folder._id %>"
+            class="fa-solid fa-trash relative z-10 shrink-0 cursor-pointer rounded p-1.5 text-sm text-red-500 hover:bg-red-50 hover:text-red-700"
+            title="Xóa folder"
+          ></i>
+        </div>
+        <% }) %>
+      </div>
+      <% } %>
+    </div>
+  </div>
+
+  <!-- Grid -->
+  <div class="max-h-[calc(100dvh-14rem)] overflow-y-auto bg-slate-50/80 px-6 py-6">
+    <div id="image_container" class="grid grid-cols-2 gap-4 md:grid-cols-3 lg:grid-cols-5">
+      <% if (images.length === 0) { %>
+      <p class="col-span-full py-12 text-center text-sm text-gray-500">Chưa có ảnh nào</p>
+      <% } else { %> <% images.forEach(img => { %>
+      <% var isVid = img.path && /\.(mp4|webm|ogg|mov|m4v)$/i.test(img.path); %>
+      <div class="group relative overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-slate-200/80">
+        <% if (isVid) { %>
+        <video
+          src="/<%= img.path %>"
+          class="aspect-video w-full object-cover"
+          muted
+          playsinline
+          preload="metadata"
+        ></video>
+        <% } else { %>
+        <img
+          src="/<%= img.path %>"
+          alt="<%= img.name %>"
+          loading="lazy"
+          class="aspect-video w-full object-cover"
+        />
+        <% } %>
+        <div
+          class="absolute inset-0 flex items-center justify-center gap-3 bg-slate-900/50 opacity-0 backdrop-blur-[1px] transition-opacity group-hover:opacity-100"
+        >
+          <a
+            href="/<%= img.path %>"
+            target="_blank"
+            class="rounded-lg bg-white px-3 py-1.5 text-sm font-medium text-slate-800 shadow-sm hover:bg-slate-50"
+          >
+            View
+          </a>
+          <button
+            type="button"
+            data-id="<%= img.path %>"
+            class="rounded-lg bg-red-600 px-3 py-1.5 text-sm font-medium text-white shadow-sm hover:bg-red-700"
+          >
+            Delete
+          </button>
+        </div>
+      </div>
+      <% }) %> <% } %>
+    </div>
+  </div>
+</div>
+
+<div
+  id="modal"
+  hidden
+  class="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/45 p-4 backdrop-blur-[2px]"
+  aria-hidden="true"
+>
+  <div class="relative w-full max-w-md rounded-2xl border border-slate-200 bg-white p-6 shadow-xl">
+    <h2 class="mb-4 text-lg font-bold text-slate-800">Tạo folder mới</h2>
+    <div>
+      <input
+        type="text"
+        name="foler_name"
+        class="w-full rounded-lg border border-slate-300 px-3 py-2.5 text-sm text-slate-900 outline-none ring-indigo-500/20 focus:border-indigo-500 focus:ring-2"
+        placeholder="Folder name..."
+      />
+    </div>
+    <div class="mt-6 flex justify-end gap-2">
+      <button
+        id="closeModal"
+        type="button"
+        class="rounded-lg border border-slate-300 bg-white px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50"
+      >
+        Cancel
+      </button>
+      <button
+        id="btn_cta_create_folder"
+        type="button"
+        class="rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white hover:bg-indigo-700"
+      >
+        OK
+      </button>
+    </div>
+    <button
+      id="closeX"
+      type="button"
+      class="absolute right-4 top-4 text-xl leading-none text-slate-400 hover:text-slate-700"
+      aria-label="Đóng"
+    >
+      ✕
+    </button>
+  </div>
+</div>
+
+<script>
+  const ROOT_ACTIVE = [
+    "bg-purple-100",
+    "text-indigo-800",
+    "font-bold",
+    "shadow-sm",
+    "ring-1",
+    "ring-purple-200/70",
+  ];
+  const ROOT_IDLE = [
+    "bg-transparent",
+    "text-gray-700",
+    "font-medium",
+    "shadow-none",
+    "ring-0",
+    "hover:bg-slate-100",
+  ];
+
+  const CHILD_ACTIVE = ["bg-purple-50", "text-indigo-900", "font-semibold"];
+  const CHILD_IDLE = ["bg-transparent", "text-gray-700", "font-normal"];
+
+  const imageContainerElement = document.querySelector("#image_container");
+  let activeFolderId = "all";
+  const modal = document.getElementById("modal");
+
+  document.getElementById("openModal").onclick = () => {
+    modal.removeAttribute("hidden");
+    modal.setAttribute("aria-hidden", "false");
+  };
+
+  function closeModal() {
+    modal.setAttribute("hidden", "");
+    modal.setAttribute("aria-hidden", "true");
+  }
+
+  document.getElementById("closeModal").onclick = closeModal;
+  document.getElementById("closeX").onclick = closeModal;
+
+  modal.addEventListener("click", (e) => {
+    if (e.target === modal) closeModal();
+  });
+
+  imageContainerElement.addEventListener("click", async (ev) => {
+    const deleteBtn = ev.target.closest("button[data-id]");
+    if (!deleteBtn) return;
+
+    const imagePath = deleteBtn.dataset.id;
+
+    if (!confirm("Xoá ảnh này?")) return;
+
+    try {
+      const res = await fetch("/admin/media/images", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          img_path: imagePath,
+          folder_id: activeFolderId,
+        }),
+      });
+
+      const data = await res.json();
+      if (!data.success) return alert("Xoá lỗi");
+
+      renderImages(data.images);
+    } catch (err) {
+      console.log(err);
+    }
+  });
+
+  document.querySelector("#btn_cta_create_folder").addEventListener("click", () => {
+    const payload = {
+      folder_name: document.querySelector('input[name="foler_name"]').value,
+    };
+    fetch(`/admin/media/folders`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    })
+      .then((res) => res.json())
+      .then((res) => {
+        if (res.success) {
+          alert("created success");
+          document.location.reload();
+        }
+      })
+      .catch(() => {
+        alert("created folder failed");
+      });
+  });
+
+  function setFolderActive(folderItem) {
+    document.querySelectorAll(".folder-item.root").forEach((el) => {
+      el.classList.remove(...ROOT_ACTIVE);
+      el.classList.add(...ROOT_IDLE);
+    });
+    document.querySelectorAll(".folder-item.child").forEach((el) => {
+      el.classList.remove(...CHILD_ACTIVE);
+      el.classList.add(...CHILD_IDLE);
+    });
+
+    if (folderItem.classList.contains("root")) {
+      folderItem.classList.remove(...ROOT_IDLE);
+      folderItem.classList.add(...ROOT_ACTIVE);
+    } else {
+      folderItem.classList.remove(...CHILD_IDLE);
+      folderItem.classList.add(...CHILD_ACTIVE);
+    }
+  }
+
+  async function loadFolderImages(folderId) {
+    activeFolderId = folderId;
+    const res = await fetch(`/admin/media/images?folder=${folderId}`);
+    const data = await res.json();
+    renderImages(data.images);
+  }
+
+  const folderTree = document.querySelector("#folder_tree");
+
+  folderTree.addEventListener("click", async (e) => {
+    const delBtn = e.target.closest("[data-del]");
+    if (delBtn) {
+      const folderId = delBtn.dataset.del;
+
+      if (!confirm("Xoá folder và toàn bộ ảnh bên trong?")) return;
+
+      try {
+        const res = await fetch(`/admin/media/folders/${folderId}`, {
+          method: "DELETE",
+        });
+
+        const data = await res.json();
+        if (!data.success) return alert("Xoá lỗi");
+
+        activeFolderId = "all";
+        location.reload();
+      } catch (err) {
+        console.log(err);
+      }
+      return;
+    }
+
+    const folderItem = e.target.closest(".folder-item");
+    if (!folderItem) return;
+
+    const folderId = folderItem.dataset.folder;
+    setFolderActive(folderItem);
+    await loadFolderImages(folderId);
+  });
+
+  document.getElementById("btnUpload").addEventListener("click", async () => {
+    const fileInput = document.getElementById("uploadInput");
+    const file = fileInput.files[0];
+
+    if (!file) return alert("Chọn ảnh hoặc video");
+
+    const formData = new FormData();
+    formData.append("image", file);
+    formData.append("folder_id", activeFolderId);
+
+    try {
+      const res = await fetch("/admin/media/images/upload", {
+        method: "POST",
+        body: formData,
+      });
+
+      const data = await res.json().catch(() => ({}));
+
+      if (!data.success) {
+        return alert(data.message || "Upload lỗi");
+      }
+
+      renderImages(data.images);
+      fileInput.value = "";
+    } catch (err) {
+      console.log(err);
+      alert("Lỗi mạng hoặc máy chủ");
+    }
+  });
+
+  function renderImages(images) {
+    imageContainerElement.innerHTML = "";
+
+    if (!images.length) {
+      imageContainerElement.innerHTML = `
+        <p class="col-span-full py-12 text-center text-sm text-gray-500">
+          Chưa có ảnh nào
+        </p>
+      `;
+      return;
+    }
+
+    images.forEach((img) => {
+      const isVid = img.path && /\.(mp4|webm|ogg|mov|m4v)$/i.test(img.path);
+      const mediaTag = isVid
+        ? `<video src="/${img.path}" class="aspect-video w-full object-cover" muted playsinline preload="metadata"></video>`
+        : `<img src="/${img.path}" loading="lazy" class="aspect-video w-full object-cover" alt="" />`;
+
+      const html = `
+        <div class="group relative overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-slate-200/80">
+          ${mediaTag}
+
+          <div class="absolute inset-0 flex items-center justify-center gap-3 bg-slate-900/50 opacity-0 backdrop-blur-[1px] transition-opacity group-hover:opacity-100">
+
+            <a href="/${img.path}" target="_blank"
+              class="rounded-lg bg-white px-3 py-1.5 text-sm font-medium text-slate-800 shadow-sm hover:bg-slate-50">View</a>
+
+            <button type="button" data-id="${img.path}"
+              class="rounded-lg bg-red-600 px-3 py-1.5 text-sm font-medium text-white shadow-sm hover:bg-red-700">
+              Delete
+            </button>
+          </div>
+        </div>
+      `;
+
+      imageContainerElement.insertAdjacentHTML("beforeend", html);
+    });
+  }
+</script>

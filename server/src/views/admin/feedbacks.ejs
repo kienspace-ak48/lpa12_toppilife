@@ -1,3 +1,32 @@
+<script defer src="/js/admin-media-picker.js"></script>
+<style>
+  #fbForm .image_action input.img_input {
+    clip: rect(0, 0, 0, 0);
+    clip-path: inset(50%);
+    height: 1px;
+    width: 1px;
+    overflow: hidden;
+    position: absolute;
+    left: 0;
+    bottom: 0;
+    white-space: nowrap;
+    padding: 0;
+    margin: 0;
+    border: 0;
+  }
+  #fbForm .image_action {
+    position: relative;
+  }
+  #fbForm .fb-avatar-preview img,
+  #fbForm .fb-avatar-preview video {
+    width: 96px;
+    height: 96px;
+    max-height: none;
+    object-fit: cover;
+    border-radius: 9999px;
+  }
+</style>
+
 <div class="mb-4 flex items-center justify-between">
   <h1 class="text-xl font-bold">Feedback management</h1>
   <button id="btnOpenCreate" class="px-4 py-2 bg-blue-600 text-white rounded-lg font-semibold shadow">
@@ -84,45 +113,51 @@
       </select>
       <textarea name="comment" placeholder="Comment" class="md:col-span-2 px-3 py-2 border rounded" rows="4" required></textarea>
 
-      <div class="md:col-span-2 border rounded p-3">
-        <p class="font-semibold text-sm mb-2">Avatar</p>
+      <div class="md:col-span-2 border rounded p-3 space-y-2">
+        <p class="font-semibold text-sm">Avatar</p>
         <div class="image_action space-y-2">
-          <button type="button" class="chooseImage px-3 py-2 border rounded text-sm">Chọn avatar</button>
-          <input type="hidden" name="avatar_url" class="img_input" />
-          <div class="img_preview w-20 h-20 border rounded-full overflow-hidden bg-gray-50">
-            <img src="" class="w-full h-full object-cover" />
+          <button type="button" class="chooseImg px-4 py-2 border border-blue-500 text-blue-600 rounded-lg text-sm font-semibold w-fit">
+            Chọn ảnh từ Media Library
+          </button>
+          <input type="text" name="avatar_url" class="img_input" placeholder="uploads/..." autocomplete="off" />
+          <div class="img_preview fb-avatar-preview w-24 h-24 mx-auto rounded-full overflow-hidden border bg-gray-50 flex items-center justify-center"></div>
+        </div>
+      </div>
+
+      <div class="md:col-span-2 border rounded p-3 space-y-3">
+        <p class="font-semibold text-sm">Ảnh feedback (tối đa 2)</p>
+        <div class="space-y-3">
+          <div class="image_action space-y-2 rounded-lg bg-gray-50/80 p-3">
+            <p class="text-xs text-gray-600 font-medium">Ảnh 1</p>
+            <button type="button" class="chooseImg px-4 py-2 border border-blue-500 text-blue-600 rounded-lg text-sm font-semibold w-fit">
+              Chọn ảnh
+            </button>
+            <input type="text" name="image_1" class="img_input" placeholder="uploads/..." autocomplete="off" />
+            <div class="img_preview rounded-lg border bg-white min-h-[100px] flex items-center justify-center overflow-hidden"></div>
+          </div>
+          <div class="image_action space-y-2 rounded-lg bg-gray-50/80 p-3">
+            <p class="text-xs text-gray-600 font-medium">Ảnh 2</p>
+            <button type="button" class="chooseImg px-4 py-2 border border-blue-500 text-blue-600 rounded-lg text-sm font-semibold w-fit">
+              Chọn ảnh
+            </button>
+            <input type="text" name="image_2" class="img_input" placeholder="uploads/..." autocomplete="off" />
+            <div class="img_preview rounded-lg border bg-white min-h-[100px] flex items-center justify-center overflow-hidden"></div>
           </div>
         </div>
       </div>
 
-      <div class="md:col-span-2 border rounded p-3">
-        <p class="font-semibold text-sm mb-2">Ảnh feedback (tối đa 2)</p>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-          <div class="image_action space-y-2">
-            <button type="button" class="chooseImage px-3 py-2 border rounded text-sm">Chọn ảnh 1</button>
-            <input type="hidden" name="image_1" class="img_input" />
-            <div class="img_preview h-24 border rounded overflow-hidden bg-gray-50">
-              <img src="" class="w-full h-full object-cover" />
-            </div>
-          </div>
-          <div class="image_action space-y-2">
-            <button type="button" class="chooseImage px-3 py-2 border rounded text-sm">Chọn ảnh 2</button>
-            <input type="hidden" name="image_2" class="img_input" />
-            <div class="img_preview h-24 border rounded overflow-hidden bg-gray-50">
-              <img src="" class="w-full h-full object-cover" />
-            </div>
-          </div>
+      <div class="md:col-span-2 border rounded p-3 space-y-2">
+        <p class="font-semibold text-sm">Video</p>
+        <div class="image_action space-y-2">
+          <button type="button" class="chooseImg px-4 py-2 border border-blue-500 text-blue-600 rounded-lg text-sm font-semibold w-fit">
+            Chọn video từ Media Library
+          </button>
+          <input type="text" name="video_file_path" class="img_input" placeholder="uploads/..." autocomplete="off" />
+          <div class="img_preview rounded-lg border bg-gray-50 min-h-[120px] flex items-center justify-center overflow-hidden"></div>
         </div>
-      </div>
-
-      <div class="md:col-span-2 border rounded p-3">
-        <p class="font-semibold text-sm mb-2">Video feedback (preview 10s)</p>
-        <div class="video_action space-y-2">
-          <button type="button" class="chooseVideo px-3 py-2 border rounded text-sm">Chọn video</button>
-          <input type="hidden" name="video_url" class="video_input" />
-          <div class="video_preview border rounded overflow-hidden bg-gray-50">
-            <video src="" class="w-full h-40 object-cover" muted playsinline preload="metadata"></video>
-          </div>
+        <div class="pt-1">
+          <label class="block text-xs text-gray-600 mb-1 font-medium">Hoặc dán URL (YouTube, link ngoài)</label>
+          <input type="text" name="video_url" class="w-full px-3 py-2 border rounded text-sm" placeholder="https://..." autocomplete="off" />
         </div>
       </div>
       <div class="md:col-span-2 flex justify-end gap-2">
@@ -133,38 +168,11 @@
   </div>
 </div>
 
-<script src="/js/imagePicker.module.js"></script>
 <script>
+  document.addEventListener("DOMContentLoaded", () => {
   const modal = document.getElementById("fbModal");
   const form = document.getElementById("fbForm");
   const modalTitle = document.getElementById("fbModalTitle");
-
-  if (window.ImagePicker) {
-    window.ImagePicker.initImagePicker({
-      triggerSelector: ".chooseImage",
-      onSelect: (src, triggerEl) => {
-        const root = triggerEl?.closest(".image_action");
-        if (!root) return;
-        const input = root.querySelector(".img_input");
-        const preview = root.querySelector(".img_preview img");
-        if (input) input.value = src;
-        if (preview) preview.src = "/" + src;
-      },
-    });
-
-    window.ImagePicker.initImagePicker({
-      triggerSelector: ".chooseVideo",
-      mediaType: "video",
-      onSelect: (src, triggerEl) => {
-        const root = triggerEl?.closest(".video_action");
-        if (!root) return;
-        const input = root.querySelector(".video_input");
-        const preview = root.querySelector(".video_preview video");
-        if (input) input.value = src;
-        if (preview) preview.src = "/" + src;
-      },
-    });
-  }
 
   function openModal() {
     modal.classList.remove("hidden");
@@ -174,14 +182,21 @@
     modal.classList.add("hidden");
     modal.classList.remove("flex");
   }
+  function fbRefreshAllPreviews() {
+    if (typeof window.refreshAdminMediaPreview !== "function") return;
+    form.querySelectorAll(".image_action").forEach((w) => refreshAdminMediaPreview(w));
+  }
+
+  function fbVideoLooksExternal(v) {
+    const s = String(v || "").trim();
+    if (!s) return false;
+    return /^https?:\/\//i.test(s) || /youtube\.com|youtu\.be/i.test(s);
+  }
+
   function resetForm() {
     form.reset();
     form.querySelector('[name="id"]').value = "";
-    form.querySelectorAll(".img_preview img").forEach((img) => {
-      img.src = "";
-    });
-    const videoPreview = form.querySelector(".video_preview video");
-    if (videoPreview) videoPreview.src = "";
+    fbRefreshAllPreviews();
   }
 
   document.getElementById("btnOpenCreate").addEventListener("click", () => {
@@ -210,15 +225,10 @@
       form.querySelector('[name="avatar_url"]').value = fb.avatar_url || "";
       form.querySelector('[name="image_1"]').value = (fb.images || [])[0] || "";
       form.querySelector('[name="image_2"]').value = (fb.images || [])[1] || "";
-      form.querySelector('[name="video_url"]').value = fb.video_url || "";
-      const avatarPreview = form.querySelector('[name="avatar_url"]')?.closest(".image_action")?.querySelector(".img_preview img");
-      if (avatarPreview) avatarPreview.src = fb.avatar_url ? `/${fb.avatar_url}` : "";
-      const image1Preview = form.querySelector('[name="image_1"]')?.closest(".image_action")?.querySelector(".img_preview img");
-      if (image1Preview) image1Preview.src = (fb.images || [])[0] ? `/${(fb.images || [])[0]}` : "";
-      const image2Preview = form.querySelector('[name="image_2"]')?.closest(".image_action")?.querySelector(".img_preview img");
-      if (image2Preview) image2Preview.src = (fb.images || [])[1] ? `/${(fb.images || [])[1]}` : "";
-      const videoPreview = form.querySelector('[name="video_url"]')?.closest(".video_action")?.querySelector(".video_preview video");
-      if (videoPreview) videoPreview.src = fb.video_url ? `/${fb.video_url}` : "";
+      const vv = (fb.video_url || "").trim();
+      form.querySelector('[name="video_file_path"]').value = fbVideoLooksExternal(vv) ? "" : vv;
+      form.querySelector('[name="video_url"]').value = fbVideoLooksExternal(vv) ? vv : "";
+      fbRefreshAllPreviews();
       openModal();
     });
   });
@@ -247,7 +257,9 @@
         form.querySelector('[name="image_1"]').value.trim(),
         form.querySelector('[name="image_2"]').value.trim(),
       ].filter(Boolean).slice(0, 2),
-      video_url: form.querySelector('[name="video_url"]').value,
+      video_url:
+        form.querySelector('[name="video_file_path"]').value.trim() ||
+        form.querySelector('[name="video_url"]').value.trim(),
     };
     const method = id ? "PUT" : "POST";
     const url = id ? `/admin/feedbacks/${id}` : "/admin/feedbacks";
@@ -259,5 +271,6 @@
     const data = await res.json();
     if (!data.success) return alert("Save failed");
     location.reload();
+  });
   });
 </script>

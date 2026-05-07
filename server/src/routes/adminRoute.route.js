@@ -1,46 +1,59 @@
 const express = require("express");
 const router = express.Router();
 
-const galleryController = require("../controller/gallery.controller")();
-const homeController = require('../controller/home.controller')();
-const pageConfigController = require('../controller/pageConfig.controller')();
+const pageConfigController = require("../controller/pageConfig.controller")();
 const orderAdminController = require("../controller/order.admin.controller")();
 const feedbackAdminController = require("../controller/feedback.admin.controller")();
 const accountAdminController = require("../controller/account.admin.controller")();
-const mediaLibraryRoute = require("./mediaLibrary.route");
-const uploadImage = require("../config/uploadImage.config");
 const orderModel = require("../model/order.model");
 const feedbackModel = require("../model/feedback.model");
-const mediaImageModel = require("../model/mediaImage.model");
-const mediaFolderModel = require("../model/mediaFolder.model");
 const pageConfigModel = require("../model/pageConfig.model");
+// media library (/admin/media/...)
+const mediaController = require("../controller/media.controller")();
+const { uploadMedia } = require("../config/multer.config");
+
+function multerUpload(upload, fieldName) {
+  return (req, res, next) => {
+    upload.single(fieldName)(req, res, (err) => {
+      if (err) {
+        const code = err.code;
+        let message = err.message || "Upload không hợp lệ";
+        if (code === "LIMIT_FILE_SIZE") {
+          message = "File quá lớn (giới hạn xem gợi ý trên nút Upload)";
+        }
+        return res.status(400).json({
+          success: false,
+          message,
+        });
+      }
+      next();
+    });
+  };
+}
+
+router.get("/media", mediaController.Index);
+router.post("/media/folders", mediaController.CreateFolder);
+router.delete("/media/folders/:id", mediaController.DeleteFolder);
+router.get("/media/images", mediaController.ListImages);
+router.delete("/media/images", mediaController.DeleteImage);
+router.post(
+  "/media/images/upload",
+  multerUpload(uploadMedia, "image"),
+  mediaController.UploadMedia,
+);
+router.post(
+  "/media/videos/upload",
+  multerUpload(uploadMedia, "video"),
+  mediaController.UploadMedia,
+);
 
 // -cutomize
-router.get('/page-config/customize-section', pageConfigController.CustomizeSection);
-router.put('/page-config/customize-section', pageConfigController.SaveCustomizeSection);
+router.get("/page-config/customize-section", pageConfigController.CustomizeSection);
+router.put("/page-config/customize-section", pageConfigController.SaveCustomizeSection);
 //pageconfig
-router.post('/page-config/create-update', pageConfigController.SaveAndUpdate);
-router.get('/page-config', pageConfigController.Index);
+router.post("/page-config/create-update", pageConfigController.SaveAndUpdate);
+router.get("/page-config", pageConfigController.Index);
 //
-
-//
-router.delete("/gallery/image-delete", galleryController.DeleteImage);
-router.get('/gallery/image-getall', galleryController.GetAll);
-router.get("/gallery", galleryController.Index);
-// ======== folder
-router.post('/gallery/folder/create', galleryController.CreateFolder);
-router.delete('/gallery/folder-delete', galleryController.DeleteFolder);
-//===========category
-router.post('/gallery/category/create', galleryController.CreateFolder);
-router.get('/gallery/category/get-all', galleryController.GetAllFolder);
-router.get('/gallery/images', galleryController.GetAllImageByFolder);
-router.post('/gallery/image-upload-ajax',uploadImage.single("image"),
-(req, res, next) => {
-  // console.log("REQ.FILE =", req.file);
-  next();
-},galleryController.UploadImage);
-router.delete('/gallery/image-delete-ajax', galleryController.DeleteImageAjax);
-router.use("/media", mediaLibraryRoute);
 
 router.get("/orders", orderAdminController.Index);
 router.get("/orders/export", orderAdminController.ExportExcel);
@@ -64,7 +77,7 @@ router.get("/", async (req, res) => {
     sevenDaysAgo.setHours(0, 0, 0, 0);
     sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 6);
 
-    const [totalOrders, todayOrders, statusRows, feedbackStats, dailyRows, mediaImages, mediaFolders, pageConfig] = await Promise.all([
+    const [totalOrders, todayOrders, statusRows, feedbackStats, dailyRows, pageConfig] = await Promise.all([
       orderModel.countDocuments({ isDeleted: false }),
       orderModel.countDocuments({
         isDeleted: false,
@@ -100,8 +113,6 @@ router.get("/", async (req, res) => {
           },
         },
       ]),
-      mediaImageModel.countDocuments({ isDeleted: false }),
-      mediaFolderModel.countDocuments({ isDeleted: false }),
       pageConfigModel.findOne({}).select("customize.gtm_id customize.fb_pixel_id").lean(),
     ]);
 
@@ -131,9 +142,7 @@ router.get("/", async (req, res) => {
     }
 
     const fb = feedbackStats[0] || { total: 0, avgStar: 0 };
-    const completionRate = totalOrders
-      ? Math.round((statusMap.completed / totalOrders) * 100)
-      : 0;
+    const completionRate = totalOrders ? Math.round((statusMap.completed / totalOrders) * 100) : 0;
     const pendingOrders = Number(statusMap.new || 0) + Number(statusMap.processing || 0);
     const cancelRate = totalOrders
       ? Math.round((Number(statusMap.cancelled || 0) / totalOrders) * 100)
@@ -149,8 +158,6 @@ router.get("/", async (req, res) => {
         totalFeedbacks: fb.total || 0,
         avgRating: Number(fb.avgStar || 0).toFixed(1),
         completionRate,
-        mediaImages,
-        mediaFolders,
         trackingReady,
         statusMap,
         dailyOrders,
@@ -167,8 +174,6 @@ router.get("/", async (req, res) => {
         totalFeedbacks: 0,
         avgRating: "0.0",
         completionRate: 0,
-        mediaImages: 0,
-        mediaFolders: 0,
         trackingReady: false,
         statusMap: { new: 0, processing: 0, completed: 0, cancelled: 0 },
         dailyOrders: [],

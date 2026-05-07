@@ -28,7 +28,7 @@
   <h2 style="font-size: 24px; font-weight: 700; margin-bottom: 8px;">
     Xin chào <%= (user && user.name) ? user.name : "Admin" %> 👋
   </h2>
-  <div style="color:#6b7280; margin-bottom: 6px;">Tổng quản nhanh đúng theo nghiệp vụ: đơn hàng, feedback, media và tracking.</div>
+  <div style="color:#6b7280; margin-bottom: 6px;">Tổng quan đơn hàng, feedback và tracking.</div>
 
   <div class="kpi-grid">
     <div class="kpi-card">
@@ -40,9 +40,9 @@
       <div class="kpi-value"><%= st.pendingOrders || 0 %></div>
     </div>
     <div class="kpi-card">
-      <div class="kpi-label">Media library</div>
-      <div class="kpi-value"><%= st.mediaImages || 0 %></div>
-      <div style="font-size:12px;color:#6b7280;"><%= st.mediaFolders || 0 %> folders</div>
+      <div class="kpi-label">Feedback</div>
+      <div class="kpi-value"><%= st.totalFeedbacks || 0 %></div>
+      <div style="font-size:12px;color:#6b7280;">TB <%= st.avgRating || "0.0" %>★</div>
     </div>
     <div class="kpi-card">
       <div class="kpi-label">Tracking setup</div>
@@ -84,7 +84,6 @@
     cancelRate: st.cancelRate || 0,
     totalFeedbacks: st.totalFeedbacks || 0,
     completionRate: st.completionRate || 0,
-    mediaImages: st.mediaImages || 0,
     statusMap,
     dailyOrders,
   }) %>;

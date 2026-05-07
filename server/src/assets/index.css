@@ -1,1 +1,4 @@
 @import "tailwindcss";
+
+/* Ensure server-rendered templates contribute utilities to the CLI build */
+@source "../views/**/*.ejs";
