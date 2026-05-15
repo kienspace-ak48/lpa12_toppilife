@@ -244,7 +244,15 @@ const ORDER_ADDRESS_MAX = 80;
 const ORDER_NAME_MAX = 50;
 const ORDER_PHONE_MAX = 20;
 
-const PurchaseFrame = ({ id, data }: { id?: string; data: any }) => {
+const PurchaseFrame = ({
+  id,
+  data,
+  purchaseImageSlot = "primary",
+}: {
+  id?: string;
+  data: any;
+  purchaseImageSlot?: "primary" | "secondary";
+}) => {
   //handle form
   const [form, setForm] = useState({
     name: "",
@@ -323,6 +331,12 @@ const PurchaseFrame = ({ id, data }: { id?: string; data: any }) => {
       alert(msg);
     }
   };
+  const pf = data?.purchase_frame;
+  const imageRel =
+    purchaseImageSlot === "secondary"
+      ? String(pf?.img_url_2 || pf?.img_url || "").trim()
+      : String(pf?.img_url || "").trim();
+
   return (
     <div
       id={id}
@@ -341,8 +355,8 @@ const PurchaseFrame = ({ id, data }: { id?: string; data: any }) => {
         </div>
       </div>
       {/*  */}
-      <div className="p-6">
-        <div className="mb-6 text-center">
+      <div className="px-6 pt-6 pb-2">
+        <div className="text-center">
           <div className="flex flex-col items-center gap-1 mb-4">
             <span className="text-gray-400 line-through text-sm font-bold">
               {data?.purchase_frame?.sale?.presale}
@@ -357,17 +371,21 @@ const PurchaseFrame = ({ id, data }: { id?: string; data: any }) => {
               {data?.purchase_frame?.sale?.note}
             </span>
           </div>
-
-          <div className="rounded-2xl overflow-hidden bg-gray-50 border border-gray-100">
-            <img
-              src={ASSET_URL + data?.purchase_frame?.img_url}
-              alt="LPA12 Product"
-              className="w-full h-48 object-contain p-4"
-              referrerPolicy="no-referrer"
-            />
-          </div>
         </div>
+      </div>
 
+      {imageRel ? (
+        <div className="w-full border-y border-gray-100 bg-gray-50 overflow-hidden">
+          <img
+            src={ASSET_URL + imageRel}
+            alt="LPA12 Product"
+            className="w-full h-[200px] object-cover object-center block"
+            referrerPolicy="no-referrer"
+          />
+        </div>
+      ) : null}
+
+      <div className="p-6 pt-6">
         <form className="space-y-4" onSubmit={handleSubmit}>
           <div className="relative">
             <input
@@ -535,7 +553,7 @@ const Hero: React.FC<any> = ({ data }) => {
           ))}
         </div>
 
-        <PurchaseFrame id="hero-order" data={data} />
+        <PurchaseFrame id="hero-order" data={data} purchaseImageSlot="primary" />
       </div>
     </section>
   );
@@ -1415,7 +1433,11 @@ fbq('track', 'PageView');`;
             <p className="text-gray-600 text-sm mb-8">
               Đừng để những cơn đau mỏi làm phiền cuộc sống của bạn.
             </p>
-            <PurchaseFrame id="final-order" data={pageData} />
+            <PurchaseFrame
+              id="final-order"
+              data={pageData}
+              purchaseImageSlot="secondary"
+            />
           </section>
         </main>
 

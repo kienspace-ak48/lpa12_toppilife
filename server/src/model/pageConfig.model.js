@@ -25,6 +25,8 @@ const pageConfigSchema = new mongoose.Schema({
       _id: false
     },
     img_url: String,
+    /** Ảnh khối đặt hàng lặp lại (vd: form cuối trang); fallback ảnh đầu nếu trống */
+    img_url_2: String,
     policy: []
   },
   warrantys:[],

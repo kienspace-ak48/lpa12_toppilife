@@ -39,6 +39,7 @@ const pageConfigController = () => {
               _id: false,
             },
             img_url: data.purchase_img_url,
+            img_url_2: data.purchase_img_url_2,
             policy: data.purchase_policy,
           },
           warrantys: data.warrantys,

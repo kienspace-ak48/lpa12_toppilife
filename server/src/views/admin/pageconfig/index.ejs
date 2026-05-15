@@ -175,7 +175,10 @@
     />
 
     <!--  -->
-      <h5 class="font-bold">Image <small>(760x400)</small></h5>
+    <h5 class="font-bold">Ảnh khối đặt hàng — lần 1 (hero)</h5>
+    <p class="text-xs text-gray-500 mb-2">
+      Khuyến nghị kích thước ảnh <strong>400×200px</strong> (rộng × cao), tỉ lệ 2:1 — khớp khung hiển thị trên landing.
+    </p>
     <!-- image handle action -->
 <div class="image_action">
   <!-- <label for="">Image banner</label> -->
@@ -197,6 +200,35 @@
   <div class="img_preview border border-gray-300 w-full h-[200px]">
     <img
       src="/<%=pc?.purchase_frame?.img_url||''%>"
+      alt=""
+      class="w-full object-cover max-h-[200px]"
+    />
+  </div>
+</div>
+
+    <h5 class="font-bold pt-4">Ảnh khối đặt hàng — lần 2 (form cuối trang)</h5>
+    <p class="text-xs text-gray-500 mb-2">
+      Để trống thì dùng chung ảnh lần 1. Cùng khuyến nghị <strong>400×200px</strong>.
+    </p>
+<div class="image_action">
+  <div class="flex justify-between items-center mt-3">
+    <button
+    type="button"
+      class="flex-1 px-4 py-3 chooseImg rounded-lg border border-green-500"
+    >
+      Chọn media
+    </button>
+    <input
+      type="text"
+      name="purchase_img_url_2"
+      value="<%=pc?.purchase_frame?.img_url_2||''%>"
+      class="img_input w-full px-4 py-3 border border-gray-300 rounded-lg text-sm mt-2"
+      placeholder="uploads/..."
+    />
+  </div>
+  <div class="img_preview border border-gray-300 w-full h-[200px]">
+    <img
+      src="/<%=pc?.purchase_frame?.img_url_2||pc?.purchase_frame?.img_url||''%>"
       alt=""
       class="w-full object-cover max-h-[200px]"
     />
